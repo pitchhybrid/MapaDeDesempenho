@@ -3,7 +3,7 @@ import fdb
 class Orm:
     #Informacoes do banco alvo
     #nome_banco = '/opt/BD.ib' #linux
-    nome_banco  = r'localhost:C:\Users\Aluno\Documents\TESTE.ib' #windows
+    nome_banco  = r"localhost:C:\Users\Aluno\Documents\TESTE.ib" #windows
     login_banco = 'SYSDBA'
     senha_banco = 'masterkey'
 
