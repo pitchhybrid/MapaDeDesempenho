@@ -1,10 +1,13 @@
+import sqlite3 as sql
+from os import path
 
-
-class Relatorio():
+class Relatorio(object):
     cod_req = ''
     cod_funcionario = ''
     data_registro = ''
     hora_registro = ''
+    
+    conn = sql.connect(path.abspath("handymobile.db"))
 
     #Construtor
     def __init__(self):
