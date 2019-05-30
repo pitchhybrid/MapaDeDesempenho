@@ -17,7 +17,7 @@ class Orm(object):
         return fdb.connect(dsn=nome,user=login,password=senha,charset=None)
 
     def importaDados(self, cod_fun, data_inicio, data_fim):
-        sql = "SELECT funcionario.USERID ,ordens.CDFUNRE, ordens.DTCAD, ordens.HRCAD FROM FC12100 AS ordens JOIN FC08000 AS funcionario ON ordens.CDFUNRE = funcionario.CDFUN WHERE ordens.CDFUNRE =" + str(cod_fun) + "and (DTCAD BETWEEN '" + data_inicio + "' AND '" + data_fim +"')"
+        sql = "SELECT funcionario.USERID ,ordens.CDFUNRE, ordens.DTCAD, ordens.HRCAD FROM FC12100 AS ordens JOIN FC08000 AS funcionario ON ordens.CDFUNRE = funcionario.CDFUN WHERE ordens.CDFUNRE =" + str(cod_fun) + "and (DTCAD BETWEEN '" + data_inicio + "' AND '" + data_fim +"') ORDER BY ordens.DTCAD"
         cur = self.autenticacao().cursor()
         cur.execute(sql)
         return cur

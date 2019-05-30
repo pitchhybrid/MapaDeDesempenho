@@ -48,7 +48,7 @@ def api(codfun,data_inicio,data_fim):
     dados = []
 
     for i in dado:
-        dados.append({'codfun':str(i[1]),'nomefun':str(i[0]).strip(),'data':str(i[2]),'hora':str(i[3])})
+        dados.append({'codfun':str(i[1]),'nomefun':str(i[0]).strip(),'timestamp':str(i[2]) + " " + str(i[3])})
     
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype='application/json')
