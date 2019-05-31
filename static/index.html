@@ -7,7 +7,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Home</title>
 
-    <link rel="stylesheet" type="text/css" href="static/css/styles.css">
+    <link rel="stylesheet" type="text/css" href="../static/css/styles.css">
     <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../static/css/Chart.min.css">
 
@@ -16,7 +16,6 @@
     <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
     <script src="../static/js/moment.js"></script>
-    <script src="../static/js/lodash.js"></script>
     <script src="../static/js/dump.js"></script>
 
     <style>
@@ -42,7 +41,7 @@
             <table class="table table-striped table-bordered table-sm table-hover">
                 <thead>
                     <tr style="text-align: center">
-                        <th class="col" colspan="33"> MAIO </th>
+                        <th class="col" :colspan="cabecalho.length + 1"> {{mes}} </th>
                     </tr>
                     <tr>
                         <th class="col" v-for="index in cabecalho" :key="index">{{index}}</th>
@@ -55,7 +54,7 @@
                 </tbody>
                 <tfoot>
                     <tr style="text-align: center">
-                        <th colspan="33">{{funcionarios.length}} FUNCIONARIOS</th>
+                        <th :colspan="cabecalho.length + 1" >{{funcionarios.length}} FUNCIONARIOS</th>
                     </tr>
                 </tfoot>
             </table>
@@ -119,11 +118,11 @@
         var relatorio =  Vue.component("relatorio",{
             template:"#relatorio",
             created(){
-
             },
             data(){
                 return{
-                    cabecalho:["FUNCIONARIO",1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31],
+                    cabecalho:["FUNCIONARIO"].concat(getDays()),
+                    mes: getMes(),
                     funcionarios:[,,,,,,,,,,,,,,]
                 }
             }
@@ -187,27 +186,81 @@
         var app = new Vue({ el:"#app",router});
         
         function montarHora(time){
-            let tempo = time.split(" ")
-            return moment(tempo[1],"HH:mm:ss")
+            let tempo = time.split(" ");
+            return moment(tempo[1],"HH:mm:ss");
         }
 
         function montarData(data){
-            let date = data.split(" ")
-            return moment(date[0])
+            let date = data.split(" ");
+            return moment(date[0],"YYYY/MM/DD");
         } 
 
-        function timeInterval(tempoMenor,tempoMaior){
+        function getTimeInterval(tempoMenor,tempoMaior){
 
-            let ms = moment(tempoMaior,"YYYY/MM/DD HH:mm:ss").diff(moment(tempoMenor,"YYYY/MM/DD HH:mm:ss"));
+            let ms = moment(tempoMaior,"YYYY-MM-DD HH:mm:ss").diff(moment(tempoMenor,"YYYY-MM-DD HH:mm:ss"));
             let d = moment.duration(ms);
             let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
             return s
         }
 
-        function horaMaior(time){
-            [].forEach.call(time,i => console.log(i))
+        function entre(dataQuestao,dataIni,dataFim){
+            return moment(dataQuestao,"YYYY-MM-DD").isBetween(dataIni,dataFim);
         }
 
+        function getDays(){
+            let arr = []
+            let max = moment(moment.now()).daysInMonth()
+            for(i=1;i<=max;i++)
+                arr.push(i)
+            
+            return arr
+        }
+
+        function getMes(){
+            let mes = new Date().getMonth()
+            
+            switch (mes) {
+                
+                case 0: return "JANEIRO"
+                    break;
+                
+                case 1: return "FERVEREIRO"
+                    break;
+                
+                case 2: return "MARÇO"
+                    break;
+                
+                case 3: return "ABRIL"
+                    break;
+                
+                case 4: return "MAIO"
+                    break;
+                
+                case 5: return "JUNHO"
+                    break;
+                
+                case 6: return "JULHO"
+                    break;
+                
+                case 7: return "AGOSTO"
+                    break;
+                
+                case 8: return "SETEMBRO"
+                    break;
+                
+                case 9: return "OUTUBRO"
+                    break;
+                
+                case 10: return "NOVEMBRO"
+                    break;
+                
+                case 11: return "DEZEMBRO"
+                    break;
+                
+                default: return "FALHA"
+                    break;
+            }
+        }
 </script>
 
     <script src="../static/js/jquery-3.3.1.slim.min.js"></script>

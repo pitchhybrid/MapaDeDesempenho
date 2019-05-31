@@ -39,8 +39,8 @@ def home():
 
 ###### CONSULTA DE VENDAS #############################
 
-@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
 @cross_origin()
+@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
 # @jwt_required()
 def api(codfun,data_inicio,data_fim):
     orm = Orm()
@@ -51,6 +51,45 @@ def api(codfun,data_inicio,data_fim):
         dados.append({'codfun':str(i[1]),'nomefun':str(i[0]).strip(),'timestamp':str(i[2]) + " " + str(i[3])})
     
     json_data = json.dumps(dados)
+    return Response(json_data,200,mimetype='application/json')
+
+@cross_origin()
+# @jwt_required()
+@app.route('/api/consulta/horas/<codfun>/<data_inicio>/<data_fim>')
+def horas(codfun,data_inicio,data_fim):
+    orm = Orm()
+    dado = orm.horaMaior(codfun,data_inicio,data_fim)
+    dados = []
+    
+    for i in dado:
+        dados.append(str(i[0]) + " " + str(i[1]))
+    
+    maior = dados[len(dados)-1]
+    menor = dados[0]
+    json_data = json.dumps({'horamaior':maior,'horamenor':menor})
+    return Response(json_data,200,mimetype='application/json')
+
+@cross_origin()
+# @jwt_required()
+@app.route('/api/consulta/funcionarios')
+def funcionarios():
+    usuarios = Usuario()
+    dado = usuarios.getFuncionarios()
+    dados = []
+    
+    for i in dado:
+        dados.append({'codfun':str(i[0]),'nomefun':str(i[1])})
+    
+    json_data = json.dumps(dados)
+    return Response(json_data,200,mimetype='application/json')
+
+@cross_origin()
+# @jwt_required()
+@app.route('/api/consulta/funcionario/<codfun>')
+def funcionario(codfun):
+    usuarios = Usuario()
+    dado = usuarios.getFuncionario(codfun)
+    json_data = json.dumps({'codfun':str(dado[0][0]),'nomefun':str(dado[0][1])})
     return Response(json_data,200,mimetype='application/json')
 
 ###################### ENDPOINTS PARA A GERENCIA DE USUARIOS #########################

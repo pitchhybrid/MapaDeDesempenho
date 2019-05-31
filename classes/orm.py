@@ -22,6 +22,12 @@ class Orm(object):
         cur.execute(sql)
         return cur
 
+    def horaMaior(self, cod_fun, data_inicio, data_fim):
+        sql = "SELECT ordens.DTCAD, ordens.HRCAD FROM FC12100 AS ordens WHERE ordens.CDFUNRE =" + str(cod_fun) + "and (DTCAD BETWEEN '" + data_inicio + "' AND '" + data_fim +"') ORDER BY ordens.HRCAD"
+        cur = self.autenticacao().cursor()
+        cur.execute(sql)
+        return cur
+        
 # "150","01.12.2018","31.12.2018"
 # import json
 # teste = Orm()

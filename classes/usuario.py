@@ -50,6 +50,18 @@ class Usuario(object):
             c.execute("SELECT * FROM mapa_users WHERE login='" + str(user_id) + "'")
             return c.fetchone()
         pass
+    
+    def getFuncionarios(self):
+        with self.conn:
+            c = self.conn.cursor()
+            c.execute("SELECT * FROM mapa_funcionarios")
+            return c.fetchall()
+
+    def getFuncionario(self,codfun):
+        with self.conn:
+            c = self.conn.cursor()
+            c.execute("SELECT * FROM mapa_funcionarios where cod="+ str(codfun) )
+            return c.fetchall()
 
 # def definirTempoMin(self):
 #     pass
