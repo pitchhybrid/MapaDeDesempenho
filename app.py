@@ -83,32 +83,27 @@ def funcionario(codfun):
 @jwt_required()
 @app.route('/api/funcionario/cadastrar', methods=['POST'])
 def cadastrar_funcionario():
-    json_data = json.loads(request.args['name'])
-    cod = json_data["cos"]
-    nomefun = json_data["nomefun"]
+    json_data = request.get_json()
     usuario = Usuario()
-    usuario.addFuncionario(cod,nomefun)
+    usuario.addFuncionario(json_data["codfun"],json_data["nomefun"])
     return Response("",200)
 
 @cross_origin()
 @jwt_required()
 @app.route('/api/funcionario/atualizar', methods=['POST'])
 def atualizar_funcionario():
-    json_data = json.loads(request.args['name'])
-    nomefun = json_data["nomefun"]
-    codfun = json_data["codfun"]
+    json_data = request.get_json()
     usuario = Usuario()
-    usuario.editaFuncionario(codfun,nomefun)
+    usuario.editaFuncionario(json_data["codfun"],json_data["nomefun"])
     return Response("",200)
 
 @cross_origin()
 @jwt_required()
 @app.route('/api/funcionario/deletar', methods=['POST'])
 def deletar_funcionario():
-    json_data = json.loads(request.args['name'])
-    id_fun = json_data['codfun']
+    json_data =request.get_json()
     usuario = Usuario()
-    usuario.remFuncionario(id_fun)
+    usuario.remFuncionario(json_data["codfun"])
     return Response("",200)
 
 ###################### ENDPOINTS PARA A GERENCIA DE USUARIOS #########################
@@ -125,36 +120,27 @@ def api_root():
 @jwt_required()
 @app.route('/api/user/cadastrar', methods=['POST'])
 def cadastrar():
-    json_data = json.loads(request.args['name'])
-    login = json_data["login"]
-    senha = json_data["senha"]
-    nome = json_data["nome"]
-    email = json_data["email"]
+    json_data = request.get_json()
     usuario = Usuario()
-    usuario.addUsuario(login, senha, nome, email)
+    usuario.addUsuario(json_data["login"],json_data["senha"],json_data["nome"], json_data["email"])
     return Response("",200)
 
 @cross_origin()
 @jwt_required()
 @app.route('/api/user/atualizar', methods=['POST'])
 def atualizar():
-    json_data = json.loads(request.args['name'])
-    login = json_data["login"]
-    senha = json_data["senha"]
-    nome = json_data["nome"]
-    email = json_data["email"]
+    json_data = request.get_json()
     usuario = Usuario()
-    usuario.editaUsuario(login, senha, nome, email)
+    usuario.editaUsuario(json_data["login"],json_data["senha"],json_data["nome"], json_data["email"],json_data["cod"])
     return Response("",200)
 
 @cross_origin()
 @jwt_required()
 @app.route('/api/user/deletar', methods=['POST'])
 def deletar():
-    json_data = json.loads(request.args['name'])
-    id_fun = json_data['id_fun']
+    json_data = request.get_json()
     usuario = Usuario()
-    usuario.remUsuario(id_fun)
+    usuario.remUsuario(json_data["cod"])
     return Response("",200)
 
 @cross_origin()
@@ -165,7 +151,7 @@ def getUser():
     dado = usuario.getUsuarios()
     dados = []
     for i in dado:
-        dados.append({'cod_user':str(i[0]),'usuario_login':str(i[1]),'email_usuario':str(i[3])})
+        dados.append({'cod_user':str(i[0]),'usuario_login':str(i[1]),'nome_usuario':str(i[3]),'email_usuario':str(i[4])})
     
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype="application/json")

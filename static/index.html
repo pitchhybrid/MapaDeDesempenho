@@ -123,44 +123,56 @@
     </template>
 
     <template id="gerenciamento">
+        
         <div class="container p-4">
-            <gerenciamento-gen :titulo="'Usuarios'" :usuarios="usuarios"></gerenciamento-gen>
-            <gerenciamento-gen :titulo="'Funcionarios'" :funcionarios="funcionarios"></gerenciamento-gen>
+            <gerenciamento-gen :titulo="'Usuarios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
+
+            <gerenciamento-gen :titulo="'Funcionarios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
         </div>
+
     </template>
 
     <template id="gerenciamento-gen">
         <div class="justify-content-center">
+            <template v-if="usuarios">
+                <button class="btn btn-outline-secondary" data-toggle="modal" :data-target="'#novo' + id"><i class="fas fa-user-plus"></i></button>
+            </template>
+            <template v-if="funcionarios">
+                <button class="btn btn-outline-secondary" data-toggle="modal" :data-target="'#novo' + id"><i class="fas fa-user-plus"></i></button>
+            </template>
             <p class="display-4" style="font-size: 2.2em;text-align: center">{{titulo}}</p>
             <table class="table table-hover">
                 <thead v-if="usuarios">
                     <tr>
                         <th>ID</th>
                         <th>USUARIO</th>
+                        <th>NOME</th>
                         <th>EMAIL</th>
                         <th>ACOES</th>
                     </tr>
                 </thead>
                 <thead v-if="funcionarios">
                     <tr>
-                        <th>ID</th>
+                        <th width="90px">ID</th>
                         <th>FUNCIONARIO</th>
-                        <th>ACOES</th>
+                        <th width="270px">ACOES</th>
                     </tr>
                 </thead>
                 <tbody v-if="usuarios">
-                    <tr v-for="usuario in usuarios" :key="usuario.cod_user">
+                    <tr v-for="(usuario) in usuarios" :key="usuario.cod_user">
                         <td>{{usuario.cod_user}}</td>
                         <td>{{usuario.usuario_login}}</td>
-                        <td>{{usuario.usuario_email}}</td>
+                        <td>{{usuario.nome_usuario}}</td>
+                        <td>{{usuario.email_usuario}}</td>
                         <td>
-                            <button class="btn btn-outline-primary">
+                            <button class="btn btn-outline-primary"
+                                    data-toggle="modal" 
+                                    :data-target="'#' + id">
                                 <i class="far fa-edit"></i>
-                            </button>
-                            <button class="btn btn-outline-danger">
+                            </button> {{getCod(usuario.cod_user)}}
+                            <button class="btn btn-outline-danger" @click.stop.prevent="remUsuario(usuario.cod_user)">
                                     <i class="fas fa-user-minus"></i>
                             </button>
-                            
                         </td>
                     </tr>
                 </tbody>
@@ -169,10 +181,12 @@
                         <td>{{funcionario.codfun}}</td>
                         <td>{{funcionario.nomefun}}</td>
                         <td>
-                            <button class="btn btn-outline-primary">
+                            <button class="btn btn-outline-primary" 
+                                    data-toggle="modal" 
+                                    :data-target="'#' + id" >
                                 <i class="far fa-edit"></i>
                             </button>
-                            <button class="btn btn-outline-danger">
+                            <button class="btn btn-outline-danger" @click.stop.prevent="remFuncionario(funcionario.codfun)">
                                 <i class="fas fa-user-minus"></i>
                             </button>
                         </td>
@@ -193,6 +207,100 @@
                     </tr>
                 </tfoot>
             </table>
+
+            <!-- Modal -->
+            <div class="modal fade" :id="id" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Edição</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <template v-if="usuarios">
+                                <label for="usuario">Usuario:. </label>
+                                <input v-model="usuario" type="text" class="form-control">
+                                
+                                <label for="nome">Nome:. </label>
+                                <input v-model="nome" type="text" class="form-control">
+                                
+                                <label for="email">Email:. </label>
+                                <input v-model="email" type="email" class="form-control">
+                                
+                                <label for="senha">Senha:. </label>
+                                <input v-model="senha" type="password" class="form-control">
+                                
+                                <label for="confirmar_senha">Confirmar senha:. </label>
+                                <input v-model="repeticao_senha" type="password" class="form-control">    
+                            </template>
+
+                            <template v-if="funcionarios">
+                                <label for="codigo">Codigo funcionario:.</label>
+                                <input v-model="codfun" style="width: 100px" type="text" class="form-control">
+                                <label for="nome">Nome do fucionario:. </label>
+                                <input v-model="funcionario" type="text" class="form-control">
+                            </template>
+                        </div>
+                        <div class="modal-footer">         
+                            <template v-if="usuarios">
+                                <button @click.stop.prevent="altUsuario()" type="button" class="btn btn-primary">Salvar</button>
+                            </template>
+                            <template v-if="funcionarios">
+                                <button @click.stop.prevent="altFuncionario()" type="button" class="btn btn-primary">Salvar</button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" :id="'novo' + id" tabindex="-1" role="dialog">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Novo</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <template v-if="usuarios">
+                                <label for="usuario">Usuario:. </label>
+                                <input v-model="usuario" type="text" class="form-control">
+                                
+                                <label for="nome">Nome:. </label>
+                                <input v-model="nome" type="text" class="form-control">
+                                
+                                <label for="email">Email:. </label>
+                                <input v-model="email" type="email" class="form-control">
+                                
+                                <label for="senha">Senha:. </label>
+                                <input v-model="senha" type="password" class="form-control">
+                                
+                                <label for="confirmar_senha">Confirmar senha:. </label>
+                                <input v-model="repeticao_senha" type="password" class="form-control">    
+                            </template>
+
+                            <template v-if="funcionarios">
+                                <label for="codigo">Codigo funcionario:.</label>
+                                <input v-model="codfun" style="width: 100px" type="text" class="form-control">
+                                <label for="nome">Nome do fucionario:. </label>
+                                <input v-model="funcionario" type="text" class="form-control">
+                            </template>
+                        </div>
+                        <div class="modal-footer"> 
+                            <template v-if="usuarios">
+                                <button @click.stop.prevent="addUsuario()" type="button" class="btn btn-primary">Salvar</button>
+                            </template>
+                            <template v-if="funcionarios">
+                                <button @click.stop.prevent="addFuncionario()" type="button" class="btn btn-primary">Salvar</button>
+                            </template>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>    
     </template>
 
@@ -323,15 +431,6 @@
                 }
             }
         })
-
-        var gerenciamento_gen = Vue.component("gerenciamento-gen",{
-            template:"#gerenciamento-gen",
-            props:{
-                titulo:String,
-                funcionarios:Array,
-                usuarios:Array
-            }
-        });
         
         var relatorio_gen =  Vue.component("relatorio-gen",{
             template:"#relatorio-gen",
@@ -356,6 +455,7 @@
                 titulo:String,
             }
         })
+        
         var relatorio = Vue.component("relatorio",{
             template:"#relatorio"
         });
@@ -384,11 +484,130 @@
                             yAxes: [{
                                 ticks: {
                                     beginAtZero: true
-                                }
-                            }]
+                                }}
+                                ]
                         }
                     }
                 });
+            }
+        });
+
+        var gerenciamento_gen = Vue.component("gerenciamento-gen",{
+            template:"#gerenciamento-gen",
+            data(){
+                return{
+                    codfun:"",
+                    funcionario:"",
+                    usuario:"",
+                    senha:"",
+                    nome:"",
+                    repeticao_senha:"",
+                    email:"",
+                    temp:""
+                }
+            },
+            props:{
+                titulo:String,
+                funcionarios:Array,
+                usuarios:Array,
+                id:String
+            },
+            methods:{
+                getCod(cod){
+                    this.temp = cod
+                },
+                addUsuario(){
+                    if(this.senha == this.repeticao_senha){
+                        let name = {
+                                login:this.usuario,
+                                senha:this.senha,
+                                nome:this.nome,
+                                email:this.email,
+                        }
+                        axios({
+                        method: 'post',
+                        url: '/user/cadastrar',
+                        data:name
+                        }).then(function(response){
+                                console.log(response)
+                        }).catch(err => console.error(err))
+                    location.reload(true)
+                    }else{
+                        alert("senhas incorretas")
+                    }
+                    
+                },
+                altUsuario(){
+                    if(this.senha == this.repeticao_senha){
+                        axios({
+                        method: 'post',
+                        url: '/user/atualizar',
+                        data:{
+                                login:this.usuario,
+                                senha:this.senha,
+                                nome:this.nome,
+                                email:this.email,
+                                cod:this.temp
+                        }
+                        }).then(function(response){
+                                console.log(response.data)
+                        }).catch(err => console.error(err))
+                      location.reload(true)
+                    }else{
+                        alert("senhas incorretas")
+                    }
+                },
+                remUsuario(cod){
+                    axios({
+                        method: 'post',
+                        url: '/user/deletar',
+                        data:{
+                               cod:cod
+                        }
+                        }).then(function(response){
+                                console.log(response)
+                        }).catch(err => console.error(err)) 
+                      location.reload(true)
+                    
+                },
+                addFuncionario(){
+                    axios({
+                        method: 'post',
+                        url: '/funcionario/cadastrar',
+                        data:{
+                                codfun:this.codfun,
+                                nomefun:this.funcionario,
+                        }
+                        }).then(function(response){
+                                console.log(response)
+                        }).catch(err => console.error(err))
+                    location.reload(true)
+                },
+                altFuncionario(){
+                    axios({
+                        method: 'post',
+                        url: '/funcionario/atualizar',
+                        data:{
+                                codfun:this.codfun,
+                                nomefun:this.funcionario
+                        }
+                        }).then(function(response){
+                                console.log(response)
+                        }).catch(err => console.error(err))
+                    location.reload(true)
+                },
+                remFuncionario(cod){
+                    axios({
+                        method: 'post',
+                        url: '/funcionario/deletar',
+                        data:{
+                            codfun:cod
+                        }
+                        }).then(function(response){
+                                console.log(response)
+                        }).catch(err => console.error(err)) 
+                      location.reload(true)
+                }
             }
         });
 
@@ -406,14 +625,14 @@
                         method: 'get',
                         url: '/consulta/funcionarios'
                         }).then(function(response){
-                                vm.funcionarios = response.data
+                            vm.funcionarios = response.data
                         }).catch(err => console.error(err))
                 
                 axios({
                         method: 'get',
                         url: '/consulta/usuarios'
-                        }).then(function(response){
-                                vm.usuarios = response.data
+                        }).then(function(response){ 
+                            vm.usuarios = response.data
                         }).catch(err => console.error(err))
                 
                 }
@@ -470,16 +689,14 @@
             ]
         });
         
-        var app = new Vue(
-                            { 
-                                el:"#app",
-                                router,
-                                data:{
+        var app = new Vue({
+                            el:"#app",
+                            router,
+                            data:{
                                     login: localStorage.getItem("AUTH_TOKEN"),
                                     erro: null
-                                }
                             }
-                         );
+                        });
 
     </script>
 
