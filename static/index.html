@@ -11,122 +11,276 @@
     <link rel="stylesheet" type="text/css" href="../static/css/bootstrap.min.css">
     <link rel="stylesheet" type="text/css" href="../static/css/Chart.min.css">
 
-    <script src="../static/js/vue.min.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
+
+    <script src="../static/js/vue.js"></script>
     <script src="../static/js/vue-router.js"></script>
     <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
     <script src="../static/js/moment.js"></script>
     <script src="../static/js/dump.js"></script>
-
-    <style>
-            body{
-                background-color: whitesmoke;
-            }
-            .container{
-                background-color: white;
-                border-radius: 15px;
-            }
-        </style>
+    <script src="../static/js/utils.js"></script>
 </head>
 <body>
     
     <div id="app">
-        <navbar></navbar>
+        <div v-if="!login">
+            <login></login>
+        </div>
+        <div v-if="login">
+            <navbar></navbar>
+            <lateralmenu>    
+                <router-view></router-view>
+            </lateralmenu>
+        </div>
         
-        <router-view></router-view>
     </div>
     
-    <template id="relatorio">
-        <div class="container p-4 mb-4">
-            <table class="table table-striped table-bordered table-sm table-hover">
-                <thead>
-                    <tr style="text-align: center">
-                        <th class="col" :colspan="cabecalho.length + 1"> {{mes}} </th>
-                    </tr>
-                    <tr>
-                        <th class="col" v-for="index in cabecalho" :key="index">{{index}}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr v-for="index in funcionarios" :key="index">
-                        <td :title="ur" v-for="ur in cabecalho">{{ur}}</td>
-                    </tr>
-                </tbody>
-                <tfoot>
-                    <tr style="text-align: center">
-                        <th :colspan="cabecalho.length + 1" >{{funcionarios.length}} FUNCIONARIOS</th>
-                    </tr>
-                </tfoot>
-            </table>
-        </div>     
-    </template>
-
     <template id="navbar">
         
-        <nav class="navbar navbar-expand-lg navbar-dark bg-info mb-4">
-                
-            <router-link class="navbar-brand" to="/"><img src="../static/img/logo.svg" alt="Logo" width="30px"></router-link>
-
-            <button class="navbar-toggler" type="button" data-toggle="collapse" 
-                    data-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" 
-                    aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-            </button>
+            <nav class="navbar bg-blue mb-4">            
+                <button class="btn btn-outline-light" id="menu-toggle">Menu</button>
+            </nav>
             
-            <div class="collapse navbar-collapse" id="navbarNavDropdown">
-                <ul class="navbar-nav">
-                <li class="nav-item">
-                    <router-link class="nav-link" to="/">Home</router-link>
-                </li>
-                <li class="nav-item">
-                    <router-link class="nav-link" to="/relatorio">Relatorio</router-link>
-                </li>
-                <li class="nav-item">
-                    <router-link class="nav-link" to="/usuarios">Usuarios</router-link>
-                </li>
-                </ul>
-            </div>
-        </nav>
+    </template>
+
+    <template id="relatorio-gen">
+        <div class="box mb-4">
+            <div class="table-responsive">
+                <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
+                <table class="table table-sm table-hover">
+                    <thead>
+                        <tr style="text-align: center">
+                            <th class="col" :colspan="cabecalho.length + 1"> {{mes}} </th>
+                        </tr>
+                        <tr>
+                            <th class="col" v-for="index in cabecalho" :key="index">{{index}}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="fun in funcionarios" :key="fun.codfun">
+                            <td>{{fun.codfun}}</td>
+                            <td>{{fun.nomefun}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr style="text-align: center">
+                            <th :colspan="cabecalho.length + 1" >{{funcionarios.length}} FUNCIONARIOS</th>
+                        </tr>
+                    </tfoot>
+                </table>    
+            </div> 
+        </div>          
+    </template>
+
+    <template id="relatorio">
+        <div class="container">
+                <relatorio-gen :titulo="'TEMPO ATIVO'"></relatorio-gen>
+                <relatorio-gen :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
+                <relatorio-gen :titulo="'VENDAS POR HORA'"></relatorio-gen>
+        </div>
         
     </template>
 
     <template id="dashboard">
         <div class="container p-4 mb-4">
-            <canvas id="grafico"></canvas>
+            <media-global></media-global>
+            <div class="box">
+                <canvas id="grafico"></canvas>
+            </div>
         </div>
     </template>
 
-    <template id="usuarios">
+    <template id="media-global">
+        <div class="container">
+            <div class="justify-content-center">
+                <p class="display-4" style="font-size: 2.2em;text-align: center">{{titulo}}</p>
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>FUNCIONARIO</th>
+                            <th>MEDIA GLOBAL</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr v-for="fun in funcionarios">
+                            <td>{{fun.codfun}}</td>
+                            <td>{{fun.nomefun}}</td>
+                        </tr>
+                    </tbody>
+                    <tfoot>
+                        <tr>
+                            <th colspan="3" style="text-align: center">
+                                {{funcionarios.length}} - FUNCIONARIOS
+                            </th>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+            
+        </div>
+    </template>
+
+    <template id="gerenciamento">
         <div class="container p-4">
             <h1>Esta perdido?</h1>
         </div>
     </template>
 
     <template id="lateralmenu">
-        <div>
-            <nav class="nav flex-column" style="width:200px">
-                <a class="nav-link active" href="#">Active</a>
-                <a class="nav-link" href="#">Link</a>
-                <a class="nav-link" href="#">Link</a>
-                <a class="nav-link" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-            </nav>
-        </div>
+            
+
+            <div class="d-flex" id="wrapper">
+
+                    <!-- Sidebar -->
+                    <div class="bg-roxo border-right " id="sidebar-wrapper">
+                      <div class="list-group list-group-flush bg-roxo">
+                        <router-link to="/" class="list-group-item list-group-item-action"><img id="logo" src="../static/img/logo_black.svg" alt="Logo"></router-link>
+                        <router-link to="/" class="list-group-item list-group-item-action">Dashboard</router-link>
+                        <router-link to="/relatorio" class="list-group-item list-group-item-action">Relatorio</router-link>
+                        <router-link to="/Gerenciamento" class="list-group-item list-group-item-action">Gerenciamento</router-link>
+                        <a href="#" class="list-group-item list-group-item-action" @click.stop.prevent="logout()">Sair</a>
+                      
+                        </div>
+
+                        <div class="copyright">
+                            <p class="display-4" style="font-size: 1em">@ HandyMobile 2019</p> 
+                            <p class="display-4" style="font-size: 1em">Todos os direitos Reservados</p>    
+                        </div>
+                        
+                    </div>
+                    
+                    <slot></slot>
+                
+            </div>
 
     </template>
-    <script>
+
+    <template id="login">
+        <div class="container">
+            <div class="box login">
+                <form>
+
+                    <div class="form-group">
+                        <label class="display-4" style="font-size: 1.2em" for="nome_usuario">Nome de Usuario</label>
+                        <input v-model="username" type="text" class="form-control" placeholder="Nome de Usuario">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="display-4" style="font-size: 1.2em" for="Senha">Senha</label>
+                        <input v-model="password" type="password" class="form-control" placeholder="Senha">
+                    </div>
+                    
+                    <button type="submit" class="float-right btn btn-outline-primary" @click.stop.prevent="login()">Entrar</button>
                 
-        var relatorio =  Vue.component("relatorio",{
-            template:"#relatorio",
-            created(){
+                </form>
+            </div>
+
+            <!-- Modal -->
+            <div class="modal fade" id="erro" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document"> 
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Herrar é Umano Tente Novamente</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h5>Usuario ou senha incorretos</h5>
+                    </div>
+                </div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <script src="../static/js/jquery-3.3.1.slim.min.js"></script>
+    <script src="../static/js/popper.min.js"></script>
+    <script src="../static/js/bootstrap.min.js"></script>
+
+    <script>
+        var AUTH_TOKEN;
+
+        axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
+
+        var login = Vue.component("login",{
+            template:"#login",
+            data(){
+                return{
+                    username: null,
+                    password: null
+                }
+            },
+            methods:{
+                login(){
+                    axios({
+                            method: 'post',
+                            url: '/auth',
+                            data: {
+                                username: this.username,
+                                password: this.password
+                        }
+                        }).then(function(response){
+                                this.AUTH_TOKEN = response.data.access_token;
+                                localStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
+                                app.$data.login = localStorage.getItem("AUTH_TOKEN")
+                                axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
+                                axios.defaults.headers.common['Content-Type'] = 'application/json';
+                        }).catch(err => {
+                            $("#erro").modal("toggle")
+                            console.error(err)
+                        })
+                    }
+            }});
+
+        var media = Vue.component("media-global",{
+            template:"#media-global",
+            mounted(){
+                let vm = this
+                axios({
+                        method: 'get',
+                        url: '/consulta/funcionarios'
+                        }).then(function(response){
+                                vm.funcionarios = response.data
+                        }).catch(err => console.error(err))
+                
             },
             data(){
                 return{
-                    cabecalho:["FUNCIONARIO"].concat(getDays()),
-                    mes: getMes(),
-                    funcionarios:[,,,,,,,,,,,,,,]
+                    titulo:getMes() +" - "+ ( moment().year() ),
+                    funcionarios:[]
                 }
             }
         })
+
+        var relatorio_gen =  Vue.component("relatorio-gen",{
+            template:"#relatorio-gen",
+            mounted(){
+                let vm = this
+                axios({
+                        method: 'get',
+                        url: '/consulta/funcionarios'
+                        }).then(function(response){
+                                vm.funcionarios = response.data
+                        }).catch(err => console.error(err))
+                
+            },
+            data(){
+                return{
+                    cabecalho:["#","FUNCIONARIO"].concat(getDays()),
+                    mes: getMes(),
+                    funcionarios: []
+                }
+            },
+            props:{
+                titulo:String,
+            }
+        })
+        var relatorio = Vue.component("relatorio",{
+            template:"#relatorio"
+        });
 
         var dashboard = Vue.component("dashboard",{
             template:"#dashboard",
@@ -160,112 +314,73 @@
             }
         });
 
-        var usuarios = Vue.component("usuarios",{
-            template:"#usuarios"
-        });
+        var gerenciamento = Vue.component("gerenciamento",{ template:"#gerenciamento"});
 
-        var lateralmenu = Vue.component("lateralmenu",{
-            template:"#lateralmenu"
-        });
+        var lateralmenu = Vue.component("lateralmenu",{ 
+            template:"#lateralmenu",
+            created(){
+            
+                $("#menu-toggle").click(function(e) {
+                    e.preventDefault();
+                $("#wrapper").toggleClass("toggled");
+                })
+            
+            },
+            methods:{
+                logout(){
+                    app.login = null;
+                    localStorage.removeItem("AUTH_TOKEN")
+                    AUTH_TOKEN = null;
+                    axios.defaults.headers.common['Authorization'] = null;
+                }    
+            } });
 
-        Vue.component("navbar",{
-            template:"#navbar",
-            data(){
-                return{
-                }
-            }
-        })
+        var navbar = Vue.component("navbar",{ template:"#navbar"});
+
         var router = new VueRouter({
             routes:[
-                { path:"/relatorio",component:relatorio },
-                { path:"/",component:dashboard },
-                { path:"/usuarios",component: usuarios }
+                { 
+                    path:"/relatorio", 
+                    name:"Relatorio",
+                    component:relatorio ,
+                    meta:{
+                        title:"Relatorio"
+                    } 
+                },
+                { 
+                    path:"/",
+                    name:"Dashboard",
+                    component:dashboard,
+                    meta:{
+                        title:"Dashboard"
+                    } 
+                },
+                { 
+                    path:"/gerenciamento",
+                    name:"Gerenciamento",
+                    component: gerenciamento,
+                    meta:{
+                        title:"Gerenciamento"
+                    }
+                 }
             ]
         });
         
-        var app = new Vue({ el:"#app",router});
+        var app = new Vue(
+                            { 
+                                el:"#app",
+                                router,
+                                data:{
+                                    login: localStorage.getItem("AUTH_TOKEN"),
+                                    erro: null
+                                }
+                            }
+                         );
         
-        function montarHora(time){
-            let tempo = time.split(" ");
-            return moment(tempo[1],"HH:mm:ss");
-        }
+        document.title = "MAPA DE DESEMPENHO"
 
-        function montarData(data){
-            let date = data.split(" ");
-            return moment(date[0],"YYYY/MM/DD");
-        } 
+    </script>
 
-        function getTimeInterval(tempoMenor,tempoMaior){
-
-            let ms = moment(tempoMaior,"YYYY-MM-DD HH:mm:ss").diff(moment(tempoMenor,"YYYY-MM-DD HH:mm:ss"));
-            let d = moment.duration(ms);
-            let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
-            return s
-        }
-
-        function entre(dataQuestao,dataIni,dataFim){
-            return moment(dataQuestao,"YYYY-MM-DD").isBetween(dataIni,dataFim);
-        }
-
-        function getDays(){
-            let arr = []
-            let max = moment(moment.now()).daysInMonth()
-            for(i=1;i<=max;i++)
-                arr.push(i)
-            
-            return arr
-        }
-
-        function getMes(){
-            let mes = new Date().getMonth()
-            
-            switch (mes) {
-                
-                case 0: return "JANEIRO"
-                    break;
-                
-                case 1: return "FERVEREIRO"
-                    break;
-                
-                case 2: return "MARÇO"
-                    break;
-                
-                case 3: return "ABRIL"
-                    break;
-                
-                case 4: return "MAIO"
-                    break;
-                
-                case 5: return "JUNHO"
-                    break;
-                
-                case 6: return "JULHO"
-                    break;
-                
-                case 7: return "AGOSTO"
-                    break;
-                
-                case 8: return "SETEMBRO"
-                    break;
-                
-                case 9: return "OUTUBRO"
-                    break;
-                
-                case 10: return "NOVEMBRO"
-                    break;
-                
-                case 11: return "DEZEMBRO"
-                    break;
-                
-                default: return "FALHA"
-                    break;
-            }
-        }
-</script>
-
-    <script src="../static/js/jquery-3.3.1.slim.min.js"></script>
-    <script src="../static/js/popper.min.js"></script>
-    <script src="../static/js/bootstrap.min.js"></script>
-
+   
 </body>
 </html>

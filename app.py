@@ -11,6 +11,8 @@ app = Flask("mapa de desempenho")
 app.debug = True
 app.secret_key = 'Mht(>0[w[s5a~s*q5[##[3zT^6}rlT'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=900)
+app.config['JWT_AUTH_URL_RULE'] = "/api/auth"
+
 
 cors = CORS(app, resources={r'/api/*': {"origins": "http://localhost:5000"}})
 
@@ -33,15 +35,14 @@ jwt = JWT(app,authenticate,identity)
 ################## ROTAS (ENDPOINTS) #########################################
 #### RAIZ (HOME) #######
 @app.route('/')
-@cross_origin()
 def home():
     return open("static/index.html","r").read()
 
 ###### CONSULTA DE VENDAS #############################
 
-@cross_origin()
 @app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
-# @jwt_required()
+@cross_origin()
+@jwt_required()
 def api(codfun,data_inicio,data_fim):
     orm = Orm()
     dado = orm.importaDados(codfun,data_inicio,data_fim)
@@ -53,24 +54,10 @@ def api(codfun,data_inicio,data_fim):
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype='application/json')
 
-@cross_origin()
-# @jwt_required()
-@app.route('/api/consulta/horas/<codfun>/<data_inicio>/<data_fim>')
-def horas(codfun,data_inicio,data_fim):
-    orm = Orm()
-    dado = orm.horaMaior(codfun,data_inicio,data_fim)
-    dados = []
-    
-    for i in dado:
-        dados.append(str(i[0]) + " " + str(i[1]))
-    
-    maior = dados[len(dados)-1]
-    menor = dados[0]
-    json_data = json.dumps({'horamaior':maior,'horamenor':menor})
-    return Response(json_data,200,mimetype='application/json')
+########################## GERENCIA DE FUNCIONARIOS ##############################
 
 @cross_origin()
-# @jwt_required()
+@jwt_required()
 @app.route('/api/consulta/funcionarios')
 def funcionarios():
     usuarios = Usuario()
@@ -84,18 +71,54 @@ def funcionarios():
     return Response(json_data,200,mimetype='application/json')
 
 @cross_origin()
-# @jwt_required()
-@app.route('/api/consulta/funcionario/<codfun>')
+@jwt_required()
+@app.route('/api/consulta/funcionario/<codfun>',methods=['GET'])
 def funcionario(codfun):
     usuarios = Usuario()
     dado = usuarios.getFuncionario(codfun)
     json_data = json.dumps({'codfun':str(dado[0][0]),'nomefun':str(dado[0][1])})
     return Response(json_data,200,mimetype='application/json')
 
+@app.route('/api/funcionario/cadastrar', methods=['POST'])
+@cross_origin()
+@jwt_required()
+def cadastrar_funcionario():
+    json_data = json.loads(request.args['name'])
+    cod = json_data["cos"]
+    nomefun = json_data["nomefun"]
+    usuario = Usuario()
+    usuario.addFuncionario(cod,nomefun)
+    return Response("",200)
+
+@app.route('/api/funcionario/atualizar', methods=['POST'])
+@cross_origin()
+@jwt_required()
+def atualizar_funcionario():
+    json_data = json.loads(request.args['name'])
+    nomefun = json_data["nomefun"]
+    codfun = json_data["codfun"]
+    usuario = Usuario()
+    usuario.editaFuncionario(codfun,nomefun)
+    return Response("",200)
+
+@app.route('/api/funcionario/deletar', methods=['POST'])
+@cross_origin()
+@jwt_required()
+def deletar_funcionario():
+    json_data = json.loads(request.args['name'])
+    id_fun = json_data['codfun']
+    usuario = Usuario()
+    usuario.remFuncionario(id_fun)
+    return Response("",200)
+
 ###################### ENDPOINTS PARA A GERENCIA DE USUARIOS #########################
 
 @app.route('/api/user')
 def user():
+    return ""
+
+@app.route('/api')
+def api_root():
     return ""
 
 @app.route('/api/user/cadastrar', methods=['POST'])

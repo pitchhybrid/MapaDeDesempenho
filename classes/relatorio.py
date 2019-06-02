@@ -7,7 +7,7 @@ class Relatorio(object):
     data_registro = ''
     hora_registro = ''
     
-    conn = sql.connect(path.abspath("handymobile.db"))
+    conn = sql.connect(path.abspath("handymobile.db"),check_same_thread=False)
 
     #Construtor
     def __init__(self):
