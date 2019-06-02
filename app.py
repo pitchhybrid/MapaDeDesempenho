@@ -79,9 +79,9 @@ def funcionario(codfun):
     json_data = json.dumps({'codfun':str(dado[0][0]),'nomefun':str(dado[0][1])})
     return Response(json_data,200,mimetype='application/json')
 
-@app.route('/api/funcionario/cadastrar', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/funcionario/cadastrar', methods=['POST'])
 def cadastrar_funcionario():
     json_data = json.loads(request.args['name'])
     cod = json_data["cos"]
@@ -90,9 +90,9 @@ def cadastrar_funcionario():
     usuario.addFuncionario(cod,nomefun)
     return Response("",200)
 
-@app.route('/api/funcionario/atualizar', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/funcionario/atualizar', methods=['POST'])
 def atualizar_funcionario():
     json_data = json.loads(request.args['name'])
     nomefun = json_data["nomefun"]
@@ -101,9 +101,9 @@ def atualizar_funcionario():
     usuario.editaFuncionario(codfun,nomefun)
     return Response("",200)
 
-@app.route('/api/funcionario/deletar', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/funcionario/deletar', methods=['POST'])
 def deletar_funcionario():
     json_data = json.loads(request.args['name'])
     id_fun = json_data['codfun']
@@ -121,9 +121,9 @@ def user():
 def api_root():
     return ""
 
-@app.route('/api/user/cadastrar', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/user/cadastrar', methods=['POST'])
 def cadastrar():
     json_data = json.loads(request.args['name'])
     login = json_data["login"]
@@ -134,9 +134,9 @@ def cadastrar():
     usuario.addUsuario(login, senha, nome, email)
     return Response("",200)
 
-@app.route('/api/user/atualizar', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/user/atualizar', methods=['POST'])
 def atualizar():
     json_data = json.loads(request.args['name'])
     login = json_data["login"]
@@ -147,9 +147,9 @@ def atualizar():
     usuario.editaUsuario(login, senha, nome, email)
     return Response("",200)
 
-@app.route('/api/user/deletar', methods=['POST'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/user/deletar', methods=['POST'])
 def deletar():
     json_data = json.loads(request.args['name'])
     id_fun = json_data['id_fun']
@@ -157,9 +157,9 @@ def deletar():
     usuario.remUsuario(id_fun)
     return Response("",200)
 
-@app.route('/api/user/getUsuarios', methods=['GET'])
 @cross_origin()
 @jwt_required()
+@app.route('/api/consulta/usuarios')
 def getUser():
     usuario = Usuario()
     dado = usuario.getUsuarios()
