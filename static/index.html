@@ -61,6 +61,9 @@
                         <tr v-for="fun in funcionarios" :key="fun.codfun">
                             <td>{{fun.codfun}}</td>
                             <td>{{fun.nomefun}}</td>
+                            <td>teste</td>
+                            <td>teste</td>
+                            <td v-for="en in entrada">{{en}}</td>
                         </tr>
                     </tbody>
                     <tfoot>
@@ -75,9 +78,10 @@
 
     <template id="relatorio">
         <div class="container">
-                <relatorio-gen :titulo="'TEMPO ATIVO'"></relatorio-gen>
-                <relatorio-gen :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
-                <relatorio-gen :titulo="'VENDAS POR HORA'"></relatorio-gen>
+                <button @click="metodo()"></button>
+                <relatorio-gen :funcionarios="funcionarios" :titulo="'TEMPO ATIVO'"></relatorio-gen>
+                <relatorio-gen :funcionarios="funcionarios" :entrada="teste()" :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
+                <relatorio-gen :funcionarios="funcionarios" :titulo="'VENDAS POR HORA'"></relatorio-gen>
         </div>
         
     </template>
@@ -377,9 +381,8 @@
     <script src="../static/js/bootstrap.min.js"></script>
 
     <script>
-        var AUTH_TOKEN;
-
         axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
+        axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
 
         var login = Vue.component("login",{
             template:"#login",
@@ -404,7 +407,6 @@
                                 app.$data.login = localStorage.getItem("AUTH_TOKEN")
                                 axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
                                 axios.defaults.headers.common['Content-Type'] = 'application/json';
-                                window.location.href = "/"; 
                         }).catch(err => {
                             $("#erro").modal("toggle")
                             console.error(err)
@@ -434,7 +436,28 @@
         
         var relatorio_gen =  Vue.component("relatorio-gen",{
             template:"#relatorio-gen",
-            mounted(){
+            data(){
+                return{
+                    cabecalho:["#","FUNCIONARIO","MEDIA","TOTAL"].concat(getDays()),
+                    mes: getMes()
+                }
+            },
+            props:{
+                titulo:String,
+                funcionarios:Array,
+                entrada:Array
+            }
+        })
+        
+        var relatorio = Vue.component("relatorio",{
+            template:"#relatorio",
+            data(){
+                return{
+                    funcionarios:[],
+                    dados:[]
+                }
+            },
+            created(){
                 let vm = this
                 axios({
                         method: 'get',
@@ -442,22 +465,26 @@
                         }).then(function(response){
                                 vm.funcionarios = response.data
                         }).catch(err => console.error(err))
-                
             },
-            data(){
-                return{
-                    cabecalho:["#","FUNCIONARIO"].concat(getDays()),
-                    mes: getMes(),
-                    funcionarios: []
-                }
-            },
-            props:{
-                titulo:String,
+            methods:{
+                teste(){
+                    return totalVendas(dados,"2018-12")
+                },
+                metodo(){
+
+                    var fun = [];
+                    var da = [];
+                    for(i of this.funcionarios)
+                    fun.push(i.codfun)
+
+                    axios({
+                            method: 'get',
+                            url: '/consulta/['+ fun.toString() +']/2018.12.01/2018.12.31'
+                            }).then(function(response){
+                                    console.log(response.data)
+                            }).catch(err => console.error(err))
+                    }
             }
-        })
-        
-        var relatorio = Vue.component("relatorio",{
-            template:"#relatorio"
         });
 
         var dashboard = Vue.component("dashboard",{
@@ -697,7 +724,158 @@
                                     erro: null
                             }
                         });
+        
+        function montarHora(time){
+            let tempo = time.split(" ");
+            return moment(tempo[1],"HH:mm:ss");
+        }
 
+        function montarData(data){
+            let date = data.split(" ");
+            return moment(date[0],"YYYY/MM/DD");
+        } 
+
+        function getTimeInterval(tempoMenor,tempoMaior){
+            let mascara;
+
+            if(tempoMaior.match("-") && tempoMenor.match("-")){
+                mascara = "YYYY-MM-DD HH:mm:ss";
+            }else{
+                mascara = "HH:mm:ss";
+            }
+            
+            let ms = moment(tempoMaior,mascara).diff(moment(tempoMenor,mascara));
+            let d = moment.duration(ms);
+            let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
+            return s
+        }
+
+        function entre(dataQuestao,dataIni,dataFim){
+            return moment(dataQuestao,"YYYY-MM-DD").isBetween(dataIni,dataFim);
+        }
+
+        function getDays(){
+            let arr = []
+            let max = moment(moment.now()).daysInMonth()
+            for(i=1;i<=max;i++)
+                arr.push(i)
+            
+            return arr
+        }
+
+        function getMes(){
+            let mes = new Date().getMonth()
+            
+            switch (mes) {
+                
+                case 0: return "JANEIRO"
+                    break;
+                
+                case 1: return "FERVEREIRO"
+                    break;
+                
+                case 2: return "MARÇO"
+                    break;
+                
+                case 3: return "ABRIL"
+                    break;
+                
+                case 4: return "MAIO"
+                    break;
+                
+                case 5: return "JUNHO"
+                    break;
+                
+                case 6: return "JULHO"
+                    break;
+                
+                case 7: return "AGOSTO"
+                    break;
+                
+                case 8: return "SETEMBRO"
+                    break;
+                
+                case 9: return "OUTUBRO"
+                    break;
+                
+                case 10: return "NOVEMBRO"
+                    break;
+                
+                case 11: return "DEZEMBRO"
+                    break;
+                
+                default: return "FALHA"
+                    break;
+            }
+        }
+
+        function filtroData(dados,periodo){
+            let a,b,c;
+            let d = [];
+            for(i of dados){
+                a = i.timestamp;
+                b = a.split(" ");
+                c = b[0];
+                if(c == periodo)
+                d.push(c);
+            }
+            return d;
+        }
+
+        function filtroHora(dados,periodo){
+            let a,b,c,e;
+            let d = [];
+            for(i of dados){
+                a = i.timestamp;
+                b = a.split(" ");
+                c = b[0];
+                e = b[1];
+                if (c == periodo)
+                d.push(e);
+            }
+            return d;
+        }
+
+        function engine(dados,periodo){
+
+
+
+        }
+
+        function total(dados,periodo){
+            let a,b,c,e;
+            let d = [];
+
+            for(i of dados){
+                a = i.timestamp;
+                b = a.split(" ");
+                c = b[0];
+                e = b[1];
+                if (c == periodo)
+                d.push(e);
+            }
+            return d.length;
+        }
+
+        function totalVendas(dados,mes){
+
+            let a = [];
+            let  b = [],c,d;
+            d = mes.split("-")
+            for(let i = 0;i<31;i++){
+                if(i<9){
+                    c = `${d[0]}-${d[1]}-0${i}`
+                }else{
+                    c = `${d[0]}-${d[1]}-${i}`
+                }
+                b.push(total(dados,c))
+
+            }
+            
+            return b
+
+        }
+    
     </script>
 
    

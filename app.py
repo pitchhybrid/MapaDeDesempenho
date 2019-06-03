@@ -41,15 +41,15 @@ def home():
 ###### CONSULTA DE VENDAS #############################
 
 @app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
-@cross_origin()
-@jwt_required()
+# @cross_origin()
+# @jwt_required()
 def api(codfun,data_inicio,data_fim):
     orm = Orm()
     dado = orm.importaDados(codfun,data_inicio,data_fim)
     dados = []
 
     for i in dado:
-        dados.append({'codfun':str(i[1]),'nomefun':str(i[0]).strip(),'timestamp':str(i[2]) + " " + str(i[3])})
+        dados.append({'codfun':str(i[0]),'timestamp':str(i[1]) + " " + str(i[2])})
     
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype='application/json')
