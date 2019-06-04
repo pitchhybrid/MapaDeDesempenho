@@ -8,7 +8,7 @@ linux = 'export '
 
 #defaut
 location = 'FLASK_APP=app.py;'
-env = 'FLASK_ENV=development;'
+env = 'FLASK_ENV=production;'
 cmd = 'python -m flask '
 
 def command(plataform,location,env,cmd):

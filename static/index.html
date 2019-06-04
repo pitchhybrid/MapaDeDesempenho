@@ -18,8 +18,10 @@
     <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
     <script src="../static/js/moment.js"></script>
-    <script src="../static/js/dump.js"></script>
-    <script src="../static/js/utils.js"></script>
+    
+    <script src="../static/js/jspdf.min.js"></script>
+    <script src="../static/js/html2canvas.min.js"></script>
+    <script src="../static/js/html2pdf.js"></script>
 </head>
 <body>
     
@@ -48,7 +50,7 @@
         <div class="box mb-4">
             <div class="table-responsive">
                 <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
-                <table class="table table-sm table-hover">
+                <table class="table table-sm table-hover relatorio">
                     <thead>
                         <tr style="text-align: center">
                             <th class="col" :colspan="cabecalho.length + 1"> {{mes}} </th>
@@ -58,12 +60,12 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="fun in funcionarios" :key="fun.codfun">
-                            <td>{{fun.codfun}}</td>
-                            <td>{{fun.nomefun}}</td>
-                            <td>teste</td>
-                            <td>teste</td>
-                            <td v-for="en in entrada">{{en}}</td>
+                        <tr v-for="(en,index) in entrada">
+                            <td>{{en.codfun}}</td>
+                            <td>{{en.nomefun}}</td>
+                            <td>{{en.total}}</td>
+                            <td>{{en.media}}</td>
+                            <td v-for="dado in en.dados">{{dado}}</td>
                         </tr>
                     </tbody>
                     <tfoot>
@@ -78,10 +80,22 @@
 
     <template id="relatorio">
         <div class="container">
-                <button @click="metodo()"></button>
-                <relatorio-gen :funcionarios="funcionarios" :titulo="'TEMPO ATIVO'"></relatorio-gen>
-                <relatorio-gen :funcionarios="funcionarios" :entrada="teste()" :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
-                <relatorio-gen :funcionarios="funcionarios" :titulo="'VENDAS POR HORA'"></relatorio-gen>
+            <div class="row justify-content-center mb-3">
+                <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar</button>
+                    <div class="col-3">
+                        <input type="date" v-model="dataInicio" class="form-control"/>
+                    </div>
+                        <button class="btn btn-success" @click.stop.prevent="capturar()">Carregar</button>
+                    <div class="col-3">
+                        <input type="date" v-model="dataFim"class="form-control"/>
+                    </div>
+                <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar</button>
+            </div>
+            <div id="relatorioExportar">
+                <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
+                <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :entrada="dadosqtd" :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
+                <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :titulo="'VENDAS POR HORA'"></relatorio-gen>                    
+            </div>
         </div>
         
     </template>
@@ -436,16 +450,12 @@
         
         var relatorio_gen =  Vue.component("relatorio-gen",{
             template:"#relatorio-gen",
-            data(){
-                return{
-                    cabecalho:["#","FUNCIONARIO","MEDIA","TOTAL"].concat(getDays()),
-                    mes: getMes()
-                }
-            },
             props:{
                 titulo:String,
                 funcionarios:Array,
-                entrada:Array
+                entrada:Array,
+                mes:String,
+                cabecalho:Array
             }
         })
         
@@ -454,7 +464,13 @@
             data(){
                 return{
                     funcionarios:[],
-                    dados:[]
+                    dadosqtd:[],
+                    dadostempo:[],
+                    dadosvenda:[],
+                    dataInicio:"",
+                    dataFim:"",
+                    mesRel:"",
+                    cabecalho:[]
                 }
             },
             created(){
@@ -467,23 +483,55 @@
                         }).catch(err => console.error(err))
             },
             methods:{
-                teste(){
-                    return totalVendas(dados,"2018-12")
-                },
-                metodo(){
-
+                capturar(){
+                    var vm = window
+                    var vm2 = this
                     var fun = [];
-                    var da = [];
                     for(i of this.funcionarios)
                     fun.push(i.codfun)
 
                     axios({
                             method: 'get',
-                            url: '/consulta/['+ fun.toString() +']/2018.12.01/2018.12.31'
+                            url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio +'/'+this.dataFim
                             }).then(function(response){
-                                    console.log(response.data)
+                                    vm.dados = response.data
+                                    vm2.popular()
                             }).catch(err => console.error(err))
+                    },
+                popular(){
+                    this.mesRel = getMes(this.dataInicio)
+                    this.cabecalho = ["#","FUNCIONARIO","MEDIA","TOTAL"].concat(getDays(this.dataInicio))
+                    var d = this.dataInicio
+                    for(i of this.funcionarios){
+                        this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,total:"NAN",media:"NAN",dados:totalVendas(dados,String(d).replace("-01",""),i.codfun)})
                     }
+                    
+                    for(i of this.funcionarios){
+                        this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,total:"NAN",media:"NAN",dados:totalHoras(dados,String(d).replace("-01",""),i.codfun)})
+                    }
+                },
+                limpar(){
+                    
+                    this.funcionarios=[]
+                    this.dadosqtd=[]
+                    this.dadostempo=[]
+                    this.dadosvenda=[]
+                    this.dataInicio=""
+                    this.dataFim=""
+                    this.mesRel= null
+                    this.cabecalho=[]
+                },
+                exportar(){
+                    var element = document.getElementById("relatorioExportar")
+                    var opt = {
+                    margin:       0,
+                    filename:     'myfile.pdf',
+                    image:        { type: 'jpeg', quality: 0.98 },
+                    html2canvas:  { scale: 2 },
+                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+};
+                    html2pdf().set(opt).from(element).save()
+                }
             }
         });
 
@@ -724,84 +772,68 @@
                                     erro: null
                             }
                         });
-        
-        function montarHora(time){
-            let tempo = time.split(" ");
-            return moment(tempo[1],"HH:mm:ss");
-        }
-
-        function montarData(data){
-            let date = data.split(" ");
-            return moment(date[0],"YYYY/MM/DD");
-        } 
 
         function getTimeInterval(tempoMenor,tempoMaior){
-            let mascara;
-
-            if(tempoMaior.match("-") && tempoMenor.match("-")){
-                mascara = "YYYY-MM-DD HH:mm:ss";
-            }else{
-                mascara = "HH:mm:ss";
-            }
-            
+            let mascara = "YYYY-MM-DD HH:mm:ss";
             let ms = moment(tempoMaior,mascara).diff(moment(tempoMenor,mascara));
             let d = moment.duration(ms);
             let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
-            return s
+            if(s == "NaNInvalid date"){
+                return "?"
+            }else{
+                return s
+            }
         }
 
-        function entre(dataQuestao,dataIni,dataFim){
-            return moment(dataQuestao,"YYYY-MM-DD").isBetween(dataIni,dataFim);
-        }
-
-        function getDays(){
+        function getDays(data){
             let arr = []
-            let max = moment(moment.now()).daysInMonth()
+            let max = moment(data,"YYYY-MM-DD").daysInMonth()
             for(i=1;i<=max;i++)
                 arr.push(i)
             
             return arr
         }
 
-        function getMes(){
-            let mes = new Date().getMonth()
-            
+        function getMes(data){
+            let a = moment(data,"YYYY-MM-DD")
+            let mes = a.month()
+            let ano = a.year()
             switch (mes) {
                 
-                case 0: return "JANEIRO"
+                case 0: return "JANEIRO - " + ano
                     break;
                 
-                case 1: return "FERVEREIRO"
+                case 1: return "FERVEREIRO - " + ano
                     break;
                 
-                case 2: return "MARÇO"
+                case 2: return "MARÇO - " + ano
                     break;
                 
-                case 3: return "ABRIL"
+                case 3: return "ABRIL - " + ano
                     break;
                 
-                case 4: return "MAIO"
+                case 4: return "MAIO - " + ano
                     break;
                 
-                case 5: return "JUNHO"
+                case 5: return "JUNHO - " + ano
                     break;
                 
-                case 6: return "JULHO"
+                case 6: return "JULHO - " + ano
                     break;
                 
-                case 7: return "AGOSTO"
+                case 7: return "AGOSTO - " + ano
                     break;
                 
-                case 8: return "SETEMBRO"
+                case 8: return "SETEMBRO - " + ano
                     break;
                 
-                case 9: return "OUTUBRO"
+                case 9: return "OUTUBRO - " + ano
                     break;
                 
-                case 10: return "NOVEMBRO"
+                case 10: return "NOVEMBRO - " + ano
                     break;
                 
-                case 11: return "DEZEMBRO"
+                case 11: return "DEZEMBRO - " + ano
                     break;
                 
                 default: return "FALHA"
@@ -822,60 +854,113 @@
             return d;
         }
 
-        function filtroHora(dados,periodo){
+        function filtroHora(dados,periodo,cod){
             let a,b,c,e;
             let d = [];
             for(i of dados){
-                a = i.timestamp;
-                b = a.split(" ");
-                c = b[0];
-                e = b[1];
-                if (c == periodo)
-                d.push(e);
+                if(i.codfun == cod){
+                    a = i.timestamp;
+                    b = a.split(" ");
+                    c = b[0];
+                    e = b[1];
+                    if (c == periodo)
+                    d.push(a);  
+                }
+               
             }
             return d;
         }
 
-        function engine(dados,periodo){
-
-
-
-        }
-
-        function total(dados,periodo){
+        function totalVendasUnitario(dados,periodo,cod){
             let a,b,c,e;
             let d = [];
 
             for(i of dados){
+                if(i.codfun == cod){
                 a = i.timestamp;
                 b = a.split(" ");
                 c = b[0];
                 e = b[1];
                 if (c == periodo)
                 d.push(e);
+                }
             }
             return d.length;
         }
 
-        function totalVendas(dados,mes){
+        function totalVendasRel(dados,periodo,cod){
+            let a = totalVendas(dados,periodo,cod)
+            let total = 0;
+            for(var i = 0 ;i<a.length;i++){
+                total = total + i
+            }
+            return total
+        }
+
+        function totalVendas(dados,mes,cod){
 
             let a = [];
             let  b = [],c,d;
             d = mes.split("-")
-            for(let i = 0;i<31;i++){
+            let e = moment(mes,"YYYY-MM")
+            for(let i = 0;i<e.daysInMonth();i++){
                 if(i<9){
                     c = `${d[0]}-${d[1]}-0${i}`
                 }else{
                     c = `${d[0]}-${d[1]}-${i}`
                 }
-                b.push(total(dados,c))
+                b.push(totalVendasUnitario(dados,c,cod))
 
             }
             
             return b
 
         }
-    
+
+        function totalHoras(dados,mes,cod){
+            let a = [];
+            let  b = [],c,d;
+            d = mes.split("-")
+            let e = moment(mes,"YYYY-MM")
+            for(let i = 0;i<e.daysInMonth();i++){
+                if(i<9){
+                    c = `${d[0]}-${d[1]}-0${i}`
+                }else{
+                    c = `${d[0]}-${d[1]}-${i}`
+                }
+                a = filtroHora(dados,c,cod)
+                b.push(getTimeInterval(a[0],a[(a.length - 1)]))
+            }
+            return b
+            }
+
+        function totalHorasSum(dados,mes,cod){
+            let a = totalHoras(dados,mes,cod)
+            let total = moment("00:00:00","hh:mm:ss")
+            for(i of a){
+                if(i == "?"){
+                    console.log(i)
+                }else{
+                    total.add(timeToSecond(String(i)),'s')
+                }
+            }
+            return total
+        }
+        
+        function timeToDecimal(t) {
+        var arr = t.split(':');
+        var dec = parseInt((arr[1]/6)*10, 10);
+
+        return parseFloat(parseInt(arr[0], 10) + '.' + (dec<10?'0':'') + dec);
+            } 
+        
+        function timeToSecond(hora){
+            var hms = String(hora);
+            var a = hms.split(':');
+            var seconds = (+a[0]) * 3600 + (+a[1]) * 60 + (+a[2]);
+            return seconds
+        }
+
     </script>
 
    
