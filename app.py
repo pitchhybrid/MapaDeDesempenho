@@ -10,6 +10,7 @@ app = Flask("mapa de desempenho")
 app.debug = False
 app.secret_key = 'Mht(>0[w[s5a~s*q5[##[3zT^6}rlT'
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1000)
+app.config['JWT_VERIFY_EXPIRATION'] = False
 app.config['JWT_AUTH_URL_RULE'] = "/api/auth"
 
 ################### METODOS PARA A JWT ########################################

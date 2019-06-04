@@ -50,7 +50,7 @@
         <div class="box mb-4">
             <div class="table-responsive">
                 <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
-                <table class="table table-sm table-hover relatorio">
+                <table class="table table-hover">
                     <thead>
                         <tr style="text-align: center">
                             <th class="col" :colspan="cabecalho.length + 1"> {{mes}} </th>
@@ -63,8 +63,6 @@
                         <tr v-for="(en,index) in entrada">
                             <td>{{en.codfun}}</td>
                             <td>{{en.nomefun}}</td>
-                            <td>{{en.total}}</td>
-                            <td>{{en.media}}</td>
                             <td v-for="dado in en.dados">{{dado}}</td>
                         </tr>
                     </tbody>
@@ -94,23 +92,25 @@
             <div id="relatorioExportar">
                 <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
                 <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :entrada="dadosqtd" :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
-                <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :titulo="'VENDAS POR HORA'"></relatorio-gen>                    
+                
+                <grafico></grafico>
+           
+
+                <!-- <media-global :funcionarios="funcionarios"></media-global>  -->
+                <!-- <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :titulo="'VENDAS POR HORA'"></relatorio-gen>                     -->
             </div>
         </div>
         
     </template>
 
-    <template id="dashboard">
-        <div class="container p-4 mb-4">
-            <media-global></media-global>
-            <div class="box">
-                <canvas id="grafico"></canvas>
-            </div>
+    <template id="grafico">
+        <div class="box mb-3">
+            <canvas id="chart"></canvas>
         </div>
     </template>
 
     <template id="media-global">
-        <div class="container">
+        <div class="box">
             <div class="justify-content-center">
                 <p class="display-4" style="font-size: 2.2em;text-align: center">{{titulo}}</p>
                 <table class="table table-hover">
@@ -142,10 +142,11 @@
 
     <template id="gerenciamento">
         
-        <div class="container p-4">
+        <div class="container w-50 p-4">
             <gerenciamento-gen :titulo="'Usuarios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
-
+           
             <gerenciamento-gen :titulo="'Funcionarios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
+
         </div>
 
     </template>
@@ -171,9 +172,9 @@
                 </thead>
                 <thead v-if="funcionarios">
                     <tr>
-                        <th width="90px">ID</th>
+                        <th>ID</th>
                         <th>FUNCIONARIO</th>
-                        <th width="270px">ACOES</th>
+                        <th>ACOES</th>
                     </tr>
                 </thead>
                 <tbody v-if="usuarios">
@@ -325,14 +326,13 @@
     <template id="lateralmenu">
             
 
-            <div class="d-flex" id="wrapper">
+            <div class="d-flex toggled" id="wrapper">
 
                     <!-- Sidebar -->
                     <div class="bg-roxo border-right " id="sidebar-wrapper">
                       <div class="list-group list-group-flush bg-roxo">
                         <router-link to="/" class="list-group-item list-group-item-action"><img id="logo" src="../static/img/logo_black.svg" alt="Logo"></router-link>
-                        <router-link to="/" class="list-group-item list-group-item-action">Dashboard</router-link>
-                        <router-link to="/relatorio" class="list-group-item list-group-item-action">Relatorio</router-link>
+                        <router-link to="/" class="list-group-item list-group-item-action">Relatorio</router-link>
                         <router-link to="/Gerenciamento" class="list-group-item list-group-item-action">Gerenciamento</router-link>
                         <a href="#" class="list-group-item list-group-item-action" @click.stop.prevent="logout()">Sair</a>
                       
@@ -395,6 +395,7 @@
     <script src="../static/js/bootstrap.min.js"></script>
 
     <script>
+        var dados = []
         axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
         axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
 
@@ -430,20 +431,13 @@
 
         var media = Vue.component("media-global",{
             template:"#media-global",
-            mounted(){
-                let vm = this
-                axios({
-                        method: 'get',
-                        url: '/consulta/funcionarios'
-                        }).then(function(response){
-                                vm.funcionarios = response.data
-                        }).catch(err => console.error(err))
-                
+            props:{
+                funcionarios:Array
             },
+            
             data(){
                 return{
-                    titulo:getMes() +" - "+ ( moment().year() ),
-                    funcionarios:[]
+                    titulo:window.mesRel,
                 }
             }
         })
@@ -482,6 +476,33 @@
                                 vm.funcionarios = response.data
                         }).catch(err => console.error(err))
             },
+            updated(){
+               
+                var ctx = document.getElementById('chart');
+
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: this.toArray(),
+                        datasets: [{
+                            label: "Quantidade de Vendas",
+                            data: this.totais(),
+                            backgroundColor: [],
+                            borderColor: [],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            yAxes: [{
+                                ticks: {
+                                    beginAtZero: true
+                                }}
+                                ]
+                        }
+                    }
+                })
+            },
             methods:{
                 capturar(){
                     var vm = window
@@ -496,23 +517,25 @@
                             }).then(function(response){
                                     vm.dados = response.data
                                     vm2.popular()
-                            }).catch(err => console.error(err))
+                                    myChart.update()
+                            }).catch(err =>{
+                                console.log(err)
+                            })
                     },
                 popular(){
                     this.mesRel = getMes(this.dataInicio)
-                    this.cabecalho = ["#","FUNCIONARIO","MEDIA","TOTAL"].concat(getDays(this.dataInicio))
+                    window.mesRel = getMes(this.dataInicio)
+                    this.cabecalho = ["#","FUNCIONARIO"].concat(getDays(this.dataInicio))
                     var d = this.dataInicio
                     for(i of this.funcionarios){
-                        this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,total:"NAN",media:"NAN",dados:totalVendas(dados,String(d).replace("-01",""),i.codfun)})
+                        this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalVendas(dados,String(d).replace("-01",""),i.codfun)})
                     }
                     
                     for(i of this.funcionarios){
-                        this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,total:"NAN",media:"NAN",dados:totalHoras(dados,String(d).replace("-01",""),i.codfun)})
+                        this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalHoras(dados,String(d).replace("-01",""),i.codfun)})
                     }
                 },
                 limpar(){
-                    
-                    this.funcionarios=[]
                     this.dadosqtd=[]
                     this.dadostempo=[]
                     this.dadosvenda=[]
@@ -529,43 +552,27 @@
                     image:        { type: 'jpeg', quality: 0.98 },
                     html2canvas:  { scale: 2 },
                     jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-};
+                    }
                     html2pdf().set(opt).from(element).save()
+                },
+                toArray(){
+                    let arr = []
+                    for(i of this.funcionarios)
+                        arr.push(String(i.nomefun))
+                    return arr
+                },
+                totais(){
+                    let arr =[]
+                    for(i of this.funcionarios)
+                        arr.push(totalVendasRel(dados,this.dataInicio,i.codfun))
+                    return arr
                 }
             }
         });
 
-        var dashboard = Vue.component("dashboard",{
-            template:"#dashboard",
-
-            mounted(){
-                
-                var ctx = document.getElementById('grafico');
-
-                var myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange','Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
-                        datasets: [{
-                            label: '# of Votes',
-                            data: [12, 19, 3, 5, 2, 3, 12, -19, 3, 5, 2, 3],
-                            backgroundColor: [],
-                            borderColor: [],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero: true
-                                }}
-                                ]
-                        }
-                    }
-                });
-            }
-        });
+        var grafico = Vue.component("grafico",{
+            template:"#grafico",
+        })
 
         var gerenciamento_gen = Vue.component("gerenciamento-gen",{
             template:"#gerenciamento-gen",
@@ -738,19 +745,11 @@
         var router = new VueRouter({
             routes:[
                 { 
-                    path:"/relatorio", 
+                    path:"/", 
                     name:"Relatorio",
                     component:relatorio ,
                     meta:{
                         title:"Relatorio"
-                    } 
-                },
-                { 
-                    path:"/",
-                    name:"Dashboard",
-                    component:dashboard,
-                    meta:{
-                        title:"Dashboard"
                     } 
                 },
                 { 
@@ -774,8 +773,10 @@
                         });
 
         function getTimeInterval(tempoMenor,tempoMaior){
-            let mascara = "YYYY-MM-DD HH:mm:ss";
-            let ms = moment(tempoMaior,mascara).diff(moment(tempoMenor,mascara));
+            let a = String(tempoMenor).split(" ")
+            let b = String(tempoMaior).split(" ")
+            let mascara = "HH:mm:ss";
+            let ms = moment(b[1],mascara).diff(moment(a[1],mascara));
             let d = moment.duration(ms);
             let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
             if(s == "NaNInvalid date"){
@@ -891,7 +892,7 @@
         function totalVendasRel(dados,periodo,cod){
             let a = totalVendas(dados,periodo,cod)
             let total = 0;
-            for(var i = 0 ;i<a.length;i++){
+            for(i of a){
                 total = total + i
             }
             return total
@@ -944,6 +945,7 @@
                     total.add(timeToSecond(String(i)),'s')
                 }
             }
+            
             return total
         }
         
