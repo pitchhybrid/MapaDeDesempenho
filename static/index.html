@@ -142,7 +142,7 @@
 
     <template id="gerenciamento">
         
-        <div class="container w-50 p-4">
+        <div class="container w-50 p-4 box">
             <gerenciamento-gen :titulo="'Usuarios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
            
             <gerenciamento-gen :titulo="'Funcionarios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
@@ -354,6 +354,7 @@
     <template id="login">
         <div class="container">
             <div class="box login">
+                <img class="mb-5 logo" src="../static/img/logo_black.svg" width="200px">
                 <form>
 
                     <div class="form-group">
@@ -393,6 +394,7 @@
     <script src="../static/js/bootstrap.min.js"></script>
 
     <script>
+
         var dados = []
         axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
         axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
@@ -474,6 +476,47 @@
                                 vm.funcionarios = response.data
                         }).catch(err => console.error(err))
             },
+            beforeUpdate(){
+               
+               var ctx = document.getElementById('chart');
+
+               var myChart = new Chart(ctx, {
+                   type: 'bar',
+                   data: {
+                       labels: [],
+                       datasets: [{
+                           label: "Quantidade de Vendas",
+                           data: [],
+                           backgroundColor: [
+                               'rgba(255, 99, 132, 0.2)',
+                               'rgba(60, 99, 70, 0.2)',
+                               'rgba(54, 162, 235, 0.2)',
+                               'rgba(255, 206, 86, 0.2)',
+                               'rgba(75, 192, 192, 0.2)',
+                               'rgba(153, 102, 255, 0.2)',
+                               'rgba(255, 159, 64, 0.2)'],
+                           borderColor: [
+                               'rgba(255, 99, 132, 1)',
+                               'rgba(60, 99, 70, 1)',
+                               'rgba(54, 162, 235, 1)',
+                               'rgba(255, 206, 86, 1)',
+                               'rgba(75, 192, 192, 1)',
+                               'rgba(153, 102, 255, 1)',
+                               'rgba(255, 159, 64, 1)'],
+                           borderWidth: 2
+                       }]
+                   },
+                   options: {
+                       scales: {
+                           yAxes: [{
+                               ticks: {
+                                   beginAtZero: true
+                               }
+                           }]
+                       }
+                   }
+               })
+           },
             updated(){
                
                 var ctx = document.getElementById('chart');
@@ -485,9 +528,23 @@
                         datasets: [{
                             label: "Quantidade de Vendas",
                             data: this.totais(),
-                            backgroundColor: [],
-                            borderColor: [],
-                            borderWidth: 1
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(60, 99, 70, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                'rgba(75, 192, 192, 0.2)',
+                                'rgba(153, 102, 255, 0.2)',
+                                'rgba(255, 159, 64, 0.2)'],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(60, 99, 70, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                'rgba(75, 192, 192, 1)',
+                                'rgba(153, 102, 255, 1)',
+                                'rgba(255, 159, 64, 1)'],
+                            borderWidth: 2
                         }]
                     },
                     options: {
@@ -495,8 +552,8 @@
                             yAxes: [{
                                 ticks: {
                                     beginAtZero: true
-                                }}
-                                ]
+                                }
+                            }]
                         }
                     }
                 })
@@ -515,15 +572,22 @@
                             }).then(function(response){
                                     vm.dados = response.data
                                     vm2.popular()
-                                    myChart.update()
                             }).catch(err =>{
-                                console.log(err)
+                               
+                            //     setTimeout(function () {
+                            //         alert("SUA SESSAO ENCERROU");
+                            //         app.login = null;
+                            //         localStorage.removeItem("AUTH_TOKEN")
+                            //         axios.defaults.headers.common['Authorization'] = null;
+                            //         window.location.href = "/"; 
+                            // }, 3000);
+                               
                             })
                     },
                 popular(){
                     this.mesRel = getMes(this.dataInicio)
                     window.mesRel = getMes(this.dataInicio)
-                    this.cabecalho = ["#","FUNCIONARIO"].concat(getDays(this.dataInicio))
+                    this.cabecalho = ["ID","FUNCIONARIO"].concat(getDays(this.dataInicio))
                     var d = this.dataInicio
                     for(i of this.funcionarios){
                         this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalVendas(dados,String(d).replace("-01",""),i.codfun)})
@@ -537,8 +601,6 @@
                     this.dadosqtd=[]
                     this.dadostempo=[]
                     this.dadosvenda=[]
-                    this.dataInicio=""
-                    this.dataFim=""
                     this.mesRel= null
                     this.cabecalho=[]
                 },
@@ -737,7 +799,7 @@
                 toggle(){
                     $("#wrapper").toggleClass("toggled");
                 }
-            }   
+            }
         });
 
         var router = new VueRouter({
@@ -960,6 +1022,8 @@
             var seconds = (+a[0]) * 3600 + (+a[1]) * 60 + (+a[2]);
             return seconds
         }
+
+    
 
     </script>
 
