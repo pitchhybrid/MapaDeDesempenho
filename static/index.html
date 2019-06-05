@@ -357,12 +357,10 @@
                 <form>
 
                     <div class="form-group">
-                        <label class="display-4" style="font-size: 1.2em" for="nome_usuario">Nome de Usuario</label>
                         <input v-model="username" type="text" class="form-control" placeholder="Nome de Usuario">
                     </div>
 
                     <div class="form-group">
-                        <label class="display-4" style="font-size: 1.2em" for="Senha">Senha</label>
                         <input v-model="password" type="password" class="form-control" placeholder="Senha">
                     </div>
                     
@@ -780,7 +778,7 @@
             let d = moment.duration(ms);
             let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
             if(s == "NaNInvalid date"){
-                return "?"
+                return "00:00:00"
             }else{
                 return s
             }
