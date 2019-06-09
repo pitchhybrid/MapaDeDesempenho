@@ -125,11 +125,11 @@ var relatorio = Vue.component("relatorio",{
         exportar(){
             var element = document.getElementById("relatorioExportar")
             var opt = {
-            margin:       0,
+            margin:       [0,0,0,0],
             filename:     'relatorio.pdf',
-            image:        { type: 'jpeg', quality: 0.98 },
-            html2canvas:  { scale: 0 },
-            jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
+            image:        { type: 'jpeg', quality: 0.95 },
+            html2canvas:  { width:1500 },
+            jsPDF:        { orientation: 'landscape' }
             }
             html2pdf().set(opt).from(element).save()
         },
