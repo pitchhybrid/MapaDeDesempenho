@@ -37,8 +37,8 @@ def home():
 
 ###### CONSULTA DE VENDAS #############################
 
-@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
 @jwt_required()
+@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
 def api(codfun,data_inicio,data_fim):
     orm = Orm()
     dado = orm.importaDados(codfun,data_inicio,data_fim)

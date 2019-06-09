@@ -18,7 +18,6 @@
     <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
     <script src="../static/js/moment.js"></script>
-    
     <script src="../static/js/jspdf.min.js"></script>
     <script src="../static/js/html2canvas.min.js"></script>
     <script src="../static/js/html2pdf.js"></script>
@@ -52,9 +51,6 @@
                 <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
                 <table class="table table-hover">
                     <thead>
-                        <tr style="text-align: center">
-                            <th class="col" :colspan="cabecalho.length + 1"> {{mes}} </th>
-                        </tr>
                         <tr>
                             <th class="col" v-for="index in cabecalho" :key="index">{{index}}</th>
                         </tr>
@@ -68,7 +64,7 @@
                     </tbody>
                     <tfoot>
                         <tr style="text-align: center">
-                            <th :colspan="cabecalho.length + 1" >{{funcionarios.length}} FUNCIONARIOS</th>
+                            <th :colspan="cabecalho.length + 1" >{{titulo}}</th>
                         </tr>
                     </tfoot>
                 </table>    
@@ -90,14 +86,14 @@
                 <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar</button>
             </div>
             <div id="relatorioExportar">
-                <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
-                <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :entrada="dadosqtd" :titulo="'QUANTIDADE APROVAÇÃO'"></relatorio-gen>
-                
+                <div class="box mb-3">
+                    <p style="text-align:center;font-size: 2.5em" class="display-4">{{mesRel}}</p>
+                </div>
                 <grafico></grafico>
-           
-
-                <!-- <media-global :funcionarios="funcionarios"></media-global>  -->
-                <!-- <relatorio-gen :cabecalho="cabecalho" :mes="mesRel" :funcionarios="funcionarios" :titulo="'VENDAS POR HORA'"></relatorio-gen>                     -->
+                <relatorio-gen :cabecalho="cabecalho" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
+                <relatorio-gen :cabecalho="cabecalho" :entrada="dadosqtd"   :titulo="'QUANTIDADE APROVA&Ccedil;&Atilde;O'"></relatorio-gen>
+                <relatorio-gen :cabecalho="cabecalho" :entrada="dadosvenda" :titulo="'VENDAS POR HORA'"></relatorio-gen>
+                <media-global  :entrada="dadosMedia"></media-global> 
             </div>
         </div>
         
@@ -110,9 +106,10 @@
     </template>
 
     <template id="media-global">
+
         <div class="box">
+                <p style="text-align:center;font-size: 2.5em" class="display-4">MEDIA GLOBAL</p>
             <div class="justify-content-center">
-                <p class="display-4" style="font-size: 2.2em;text-align: center">{{titulo}}</p>
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -122,15 +119,16 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr v-for="fun in funcionarios">
-                            <td>{{fun.codfun}}</td>
-                            <td>{{fun.nomefun}}</td>
+                        <tr v-for="en in entrada">
+                            <td>{{en.codfun}}</td>
+                            <td>{{en.nomefun}}</td>
+                            <td>{{en.dados}}</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr>
                             <th colspan="3" style="text-align: center">
-                                {{funcionarios.length}} - FUNCIONARIOS
+                                MEDIA GLOBAL
                             </th>
                         </tr>
                     </tfoot>
@@ -163,7 +161,6 @@
             <table class="table table-hover">
                 <thead v-if="usuarios">
                     <tr>
-                        <th>ID</th>
                         <th>USUARIO</th>
                         <th>NOME</th>
                         <th>EMAIL</th>
@@ -179,16 +176,15 @@
                 </thead>
                 <tbody v-if="usuarios">
                     <tr v-for="(usuario) in usuarios" :key="usuario.cod_user">
-                        <td>{{usuario.cod_user}}</td>
                         <td>{{usuario.usuario_login}}</td>
                         <td>{{usuario.nome_usuario}}</td>
                         <td>{{usuario.email_usuario}}</td>
                         <td>
-                            <button class="btn btn-outline-primary"
+                            <button class="btn btn-outline-primary" @click.stop.prevent="getCodUser(usuario.cod_user,usuario.usuario_login,usuario.nome_usuario,usuario.email_usuario)"
                                     data-toggle="modal" 
                                     :data-target="'#' + id">
                                 <i class="far fa-edit"></i>
-                            </button> {{getCod(usuario.cod_user)}}
+                            </button>
                             <button class="btn btn-outline-danger" @click.stop.prevent="remUsuario(usuario.cod_user)">
                                     <i class="fas fa-user-minus"></i>
                             </button>
@@ -200,7 +196,7 @@
                         <td>{{funcionario.codfun}}</td>
                         <td>{{funcionario.nomefun}}</td>
                         <td>
-                            <button class="btn btn-outline-primary" 
+                            <button class="btn btn-outline-primary" @click.stop.prevent="getCodFun(funcionario.codfun,funcionario.nomefun)"
                                     data-toggle="modal" 
                                     :data-target="'#' + id" >
                                 <i class="far fa-edit"></i>
@@ -331,7 +327,7 @@
                     <!-- Sidebar -->
                     <div class="bg-roxo border-right " id="sidebar-wrapper">
                       <div class="list-group list-group-flush bg-roxo">
-                        <router-link to="/" class="list-group-item list-group-item-action"><img id="logo" src="../static/img/logo_black.svg" alt="Logo"></router-link>
+                        <router-link to="/" class="list-group-item list-group-item-action"><img id="logo" src="../static/img/logo.png" alt="Logo"></router-link>
                         <router-link to="/" class="list-group-item list-group-item-action">Relatorio</router-link>
                         <router-link to="/Gerenciamento" class="list-group-item list-group-item-action">Gerenciamento</router-link>
                         <a href="#" class="list-group-item list-group-item-action" @click.stop.prevent="logout()">Sair</a>
@@ -354,7 +350,7 @@
     <template id="login">
         <div class="container">
             <div class="box login">
-                <img class="mb-5 logo" src="../static/img/logo_black.svg" width="200px">
+                <img class="mb-5 logo" src="../static/img/logo.png" width="200px">
                 <form>
 
                     <div class="form-group">
@@ -392,641 +388,6 @@
     <script src="../static/js/jquery-3.3.1.slim.min.js"></script>
     <script src="../static/js/popper.min.js"></script>
     <script src="../static/js/bootstrap.min.js"></script>
-
-    <script>
-
-        var dados = []
-        axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
-        axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
-
-        var login = Vue.component("login",{
-            template:"#login",
-            data(){
-                return{
-                    username: null,
-                    password: null
-                }
-            },
-            methods:{
-                login(){
-                    axios({
-                            method: 'post',
-                            url: '/auth',
-                            data: {
-                                username: this.username,
-                                password: this.password
-                        }
-                        }).then(function(response){
-                                this.AUTH_TOKEN = response.data.access_token;
-                                localStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
-                                app.$data.login = localStorage.getItem("AUTH_TOKEN")
-                                axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
-                                axios.defaults.headers.common['Content-Type'] = 'application/json';
-                        }).catch(err => {
-                            $("#erro").modal("toggle")
-                            console.error(err)
-                        })
-                    }
-            }});
-
-        var media = Vue.component("media-global",{
-            template:"#media-global",
-            props:{
-                funcionarios:Array
-            },
-            
-            data(){
-                return{
-                    titulo:window.mesRel,
-                }
-            }
-        })
-        
-        var relatorio_gen =  Vue.component("relatorio-gen",{
-            template:"#relatorio-gen",
-            props:{
-                titulo:String,
-                funcionarios:Array,
-                entrada:Array,
-                mes:String,
-                cabecalho:Array
-            }
-        })
-        
-        var relatorio = Vue.component("relatorio",{
-            template:"#relatorio",
-            data(){
-                return{
-                    funcionarios:[],
-                    dadosqtd:[],
-                    dadostempo:[],
-                    dadosvenda:[],
-                    dataInicio:"",
-                    dataFim:"",
-                    mesRel:"",
-                    cabecalho:[]
-                }
-            },
-            created(){
-                let vm = this
-                axios({
-                        method: 'get',
-                        url: '/consulta/funcionarios'
-                        }).then(function(response){
-                                vm.funcionarios = response.data
-                        }).catch(err => console.error(err))
-            },
-            beforeUpdate(){
-               
-               var ctx = document.getElementById('chart');
-
-               var myChart = new Chart(ctx, {
-                   type: 'bar',
-                   data: {
-                       labels: [],
-                       datasets: [{
-                           label: "Quantidade de Vendas",
-                           data: [],
-                           backgroundColor: [
-                               'rgba(255, 99, 132, 0.2)',
-                               'rgba(60, 99, 70, 0.2)',
-                               'rgba(54, 162, 235, 0.2)',
-                               'rgba(255, 206, 86, 0.2)',
-                               'rgba(75, 192, 192, 0.2)',
-                               'rgba(153, 102, 255, 0.2)',
-                               'rgba(255, 159, 64, 0.2)'],
-                           borderColor: [
-                               'rgba(255, 99, 132, 1)',
-                               'rgba(60, 99, 70, 1)',
-                               'rgba(54, 162, 235, 1)',
-                               'rgba(255, 206, 86, 1)',
-                               'rgba(75, 192, 192, 1)',
-                               'rgba(153, 102, 255, 1)',
-                               'rgba(255, 159, 64, 1)'],
-                           borderWidth: 2
-                       }]
-                   },
-                   options: {
-                       scales: {
-                           yAxes: [{
-                               ticks: {
-                                   beginAtZero: true
-                               }
-                           }]
-                       }
-                   }
-               })
-           },
-            updated(){
-               
-                var ctx = document.getElementById('chart');
-
-                var myChart = new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: this.toArray(),
-                        datasets: [{
-                            label: "Quantidade de Vendas",
-                            data: this.totais(),
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.2)',
-                                'rgba(60, 99, 70, 0.2)',
-                                'rgba(54, 162, 235, 0.2)',
-                                'rgba(255, 206, 86, 0.2)',
-                                'rgba(75, 192, 192, 0.2)',
-                                'rgba(153, 102, 255, 0.2)',
-                                'rgba(255, 159, 64, 0.2)'],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(60, 99, 70, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 206, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)',
-                                'rgba(255, 159, 64, 1)'],
-                            borderWidth: 2
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            yAxes: [{
-                                ticks: {
-                                    beginAtZero: true
-                                }
-                            }]
-                        }
-                    }
-                })
-            },
-            methods:{
-                capturar(){
-                    var vm = window
-                    var vm2 = this
-                    var fun = [];
-                    for(i of this.funcionarios)
-                    fun.push(i.codfun)
-
-                    axios({
-                            method: 'get',
-                            url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio +'/'+this.dataFim
-                            }).then(function(response){
-                                    vm.dados = response.data
-                                    vm2.popular()
-                            }).catch(err =>{
-                               
-                            //     setTimeout(function () {
-                            //         alert("SUA SESSAO ENCERROU");
-                            //         app.login = null;
-                            //         localStorage.removeItem("AUTH_TOKEN")
-                            //         axios.defaults.headers.common['Authorization'] = null;
-                            //         window.location.href = "/"; 
-                            // }, 3000);
-                               
-                            })
-                    },
-                popular(){
-                    this.mesRel = getMes(this.dataInicio)
-                    window.mesRel = getMes(this.dataInicio)
-                    this.cabecalho = ["ID","FUNCIONARIO"].concat(getDays(this.dataInicio))
-                    var d = this.dataInicio
-                    for(i of this.funcionarios){
-                        this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalVendas(dados,String(d).replace("-01",""),i.codfun)})
-                    }
-                    
-                    for(i of this.funcionarios){
-                        this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalHoras(dados,String(d).replace("-01",""),i.codfun)})
-                    }
-                },
-                limpar(){
-                    this.dadosqtd=[]
-                    this.dadostempo=[]
-                    this.dadosvenda=[]
-                    this.mesRel= null
-                    this.cabecalho=[]
-                },
-                exportar(){
-                    var element = document.getElementById("relatorioExportar")
-                    var opt = {
-                    margin:       0,
-                    filename:     'myfile.pdf',
-                    image:        { type: 'jpeg', quality: 0.98 },
-                    html2canvas:  { scale: 2 },
-                    jsPDF:        { unit: 'in', format: 'letter', orientation: 'landscape' }
-                    }
-                    html2pdf().set(opt).from(element).save()
-                },
-                toArray(){
-                    let arr = []
-                    for(i of this.funcionarios)
-                        arr.push(String(i.nomefun))
-                    return arr
-                },
-                totais(){
-                    let arr =[]
-                    for(i of this.funcionarios)
-                        arr.push(totalVendasRel(dados,this.dataInicio,i.codfun))
-                    return arr
-                }
-            }
-        });
-
-        var grafico = Vue.component("grafico",{
-            template:"#grafico",
-        })
-
-        var gerenciamento_gen = Vue.component("gerenciamento-gen",{
-            template:"#gerenciamento-gen",
-            data(){
-                return{
-                    codfun:"",
-                    funcionario:"",
-                    usuario:"",
-                    senha:"",
-                    nome:"",
-                    repeticao_senha:"",
-                    email:"",
-                    temp:""
-                }
-            },
-            props:{
-                titulo:String,
-                funcionarios:Array,
-                usuarios:Array,
-                id:String
-            },
-            methods:{
-                getCod(cod){
-                    this.temp = cod
-                },
-                addUsuario(){
-                    if(this.senha == this.repeticao_senha){
-                        let name = {
-                                login:this.usuario,
-                                senha:this.senha,
-                                nome:this.nome,
-                                email:this.email,
-                        }
-                        axios({
-                        method: 'post',
-                        url: '/user/cadastrar',
-                        data:name
-                        }).then(function(response){
-                                console.log(response)
-                        }).catch(err => console.error(err))
-                    location.reload(true)
-                    }else{
-                        alert("senhas incorretas")
-                    }
-                    
-                },
-                altUsuario(){
-                    if(this.senha == this.repeticao_senha){
-                        axios({
-                        method: 'post',
-                        url: '/user/atualizar',
-                        data:{
-                                login:this.usuario,
-                                senha:this.senha,
-                                nome:this.nome,
-                                email:this.email,
-                                cod:this.temp
-                        }
-                        }).then(function(response){
-                                console.log(response.data)
-                        }).catch(err => console.error(err))
-                      location.reload(true)
-                    }else{
-                        alert("senhas incorretas")
-                    }
-                },
-                remUsuario(cod){
-                    axios({
-                        method: 'post',
-                        url: '/user/deletar',
-                        data:{
-                               cod:cod
-                        }
-                        }).then(function(response){
-                                console.log(response)
-                        }).catch(err => console.error(err)) 
-                      location.reload(true)
-                    
-                },
-                addFuncionario(){
-                    axios({
-                        method: 'post',
-                        url: '/funcionario/cadastrar',
-                        data:{
-                                codfun:this.codfun,
-                                nomefun:this.funcionario,
-                        }
-                        }).then(function(response){
-                                console.log(response)
-                        }).catch(err => console.error(err))
-                    location.reload(true)
-                },
-                altFuncionario(){
-                    axios({
-                        method: 'post',
-                        url: '/funcionario/atualizar',
-                        data:{
-                                codfun:this.codfun,
-                                nomefun:this.funcionario
-                        }
-                        }).then(function(response){
-                                console.log(response)
-                        }).catch(err => console.error(err))
-                    location.reload(true)
-                },
-                remFuncionario(cod){
-                    axios({
-                        method: 'post',
-                        url: '/funcionario/deletar',
-                        data:{
-                            codfun:cod
-                        }
-                        }).then(function(response){
-                                console.log(response)
-                        }).catch(err => console.error(err)) 
-                      location.reload(true)
-                }
-            }
-        });
-
-        var gerenciamento = Vue.component("gerenciamento",{ 
-            template:"#gerenciamento",
-            data(){
-                return{
-                    funcionarios:[],
-                    usuarios:[]
-                }
-            },
-            mounted(){
-                let vm = this
-                axios({
-                        method: 'get',
-                        url: '/consulta/funcionarios'
-                        }).then(function(response){
-                            vm.funcionarios = response.data
-                        }).catch(err => console.error(err))
-                
-                axios({
-                        method: 'get',
-                        url: '/consulta/usuarios'
-                        }).then(function(response){ 
-                            vm.usuarios = response.data
-                        }).catch(err => console.error(err))
-                
-                }
-                
-        });
-
-        var lateralmenu = Vue.component("lateralmenu",{ 
-            template:"#lateralmenu",
-            methods:{
-                logout(){
-                    app.login = null;
-                    localStorage.removeItem("AUTH_TOKEN")
-                    AUTH_TOKEN = null;
-                    axios.defaults.headers.common['Authorization'] = null;
-                    window.location.href = "/"; 
-                }    
-            } });
-
-        var navbar = Vue.component("navbar",{ 
-            template:"#navbar",
-            methods:{
-                toggle(){
-                    $("#wrapper").toggleClass("toggled");
-                }
-            }
-        });
-
-        var router = new VueRouter({
-            routes:[
-                { 
-                    path:"/", 
-                    name:"Relatorio",
-                    component:relatorio ,
-                    meta:{
-                        title:"Relatorio"
-                    } 
-                },
-                { 
-                    path:"/gerenciamento",
-                    name:"Gerenciamento",
-                    component: gerenciamento,
-                    meta:{
-                        title:"Gerenciamento"
-                    }
-                 }
-            ]
-        });
-        
-        var app = new Vue({
-                            el:"#app",
-                            router,
-                            data:{
-                                    login: localStorage.getItem("AUTH_TOKEN"),
-                                    erro: null
-                            }
-                        });
-
-        function getTimeInterval(tempoMenor,tempoMaior){
-            let a = String(tempoMenor).split(" ")
-            let b = String(tempoMaior).split(" ")
-            let mascara = "HH:mm:ss";
-            let ms = moment(b[1],mascara).diff(moment(a[1],mascara));
-            let d = moment.duration(ms);
-            let s = Math.floor(d.asHours()) + moment.utc(ms).format(":mm:ss");
-            if(s == "NaNInvalid date"){
-                return "00:00:00"
-            }else{
-                return s
-            }
-        }
-
-        function getDays(data){
-            let arr = []
-            let max = moment(data,"YYYY-MM-DD").daysInMonth()
-            for(i=1;i<=max;i++)
-                arr.push(i)
-            
-            return arr
-        }
-
-        function getMes(data){
-            let a = moment(data,"YYYY-MM-DD")
-            let mes = a.month()
-            let ano = a.year()
-            switch (mes) {
-                
-                case 0: return "JANEIRO - " + ano
-                    break;
-                
-                case 1: return "FERVEREIRO - " + ano
-                    break;
-                
-                case 2: return "MARÇO - " + ano
-                    break;
-                
-                case 3: return "ABRIL - " + ano
-                    break;
-                
-                case 4: return "MAIO - " + ano
-                    break;
-                
-                case 5: return "JUNHO - " + ano
-                    break;
-                
-                case 6: return "JULHO - " + ano
-                    break;
-                
-                case 7: return "AGOSTO - " + ano
-                    break;
-                
-                case 8: return "SETEMBRO - " + ano
-                    break;
-                
-                case 9: return "OUTUBRO - " + ano
-                    break;
-                
-                case 10: return "NOVEMBRO - " + ano
-                    break;
-                
-                case 11: return "DEZEMBRO - " + ano
-                    break;
-                
-                default: return "FALHA"
-                    break;
-            }
-        }
-
-        function filtroData(dados,periodo){
-            let a,b,c;
-            let d = [];
-            for(i of dados){
-                a = i.timestamp;
-                b = a.split(" ");
-                c = b[0];
-                if(c == periodo)
-                d.push(c);
-            }
-            return d;
-        }
-
-        function filtroHora(dados,periodo,cod){
-            let a,b,c,e;
-            let d = [];
-            for(i of dados){
-                if(i.codfun == cod){
-                    a = i.timestamp;
-                    b = a.split(" ");
-                    c = b[0];
-                    e = b[1];
-                    if (c == periodo)
-                    d.push(a);  
-                }
-               
-            }
-            return d;
-        }
-
-        function totalVendasUnitario(dados,periodo,cod){
-            let a,b,c,e;
-            let d = [];
-
-            for(i of dados){
-                if(i.codfun == cod){
-                a = i.timestamp;
-                b = a.split(" ");
-                c = b[0];
-                e = b[1];
-                if (c == periodo)
-                d.push(e);
-                }
-            }
-            return d.length;
-        }
-
-        function totalVendasRel(dados,periodo,cod){
-            let a = totalVendas(dados,periodo,cod)
-            let total = 0;
-            for(i of a){
-                total = total + i
-            }
-            return total
-        }
-
-        function totalVendas(dados,mes,cod){
-
-            let a = [];
-            let  b = [],c,d;
-            d = mes.split("-")
-            let e = moment(mes,"YYYY-MM")
-            for(let i = 0;i<e.daysInMonth();i++){
-                if(i<9){
-                    c = `${d[0]}-${d[1]}-0${i}`
-                }else{
-                    c = `${d[0]}-${d[1]}-${i}`
-                }
-                b.push(totalVendasUnitario(dados,c,cod))
-
-            }
-            
-            return b
-
-        }
-
-        function totalHoras(dados,mes,cod){
-            let a = [];
-            let  b = [],c,d;
-            d = mes.split("-")
-            let e = moment(mes,"YYYY-MM")
-            for(let i = 0;i<e.daysInMonth();i++){
-                if(i<9){
-                    c = `${d[0]}-${d[1]}-0${i}`
-                }else{
-                    c = `${d[0]}-${d[1]}-${i}`
-                }
-                a = filtroHora(dados,c,cod)
-                b.push(getTimeInterval(a[0],a[(a.length - 1)]))
-            }
-            return b
-            }
-
-        function totalHorasSum(dados,mes,cod){
-            let a = totalHoras(dados,mes,cod)
-            let total = moment("00:00:00","hh:mm:ss")
-            for(i of a){
-                if(i == "?"){
-                    console.log(i)
-                }else{
-                    total.add(timeToSecond(String(i)),'s')
-                }
-            }
-            
-            return total
-        }
-        
-        function timeToDecimal(t) {
-        var arr = t.split(':');
-        var dec = parseInt((arr[1]/6)*10, 10);
-
-        return parseFloat(parseInt(arr[0], 10) + '.' + (dec<10?'0':'') + dec);
-            } 
-        
-        function timeToSecond(hora){
-            var hms = String(hora);
-            var a = hms.split(':');
-            var seconds = (+a[0]) * 3600 + (+a[1]) * 60 + (+a[2]);
-            return seconds
-        }
-
-    
-
-    </script>
-
-   
+    <script src="../static/js/main.js"></script>
 </body>
 </html>
