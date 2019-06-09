@@ -141,9 +141,18 @@ var relatorio = Vue.component("relatorio",{
         },
         totais(){
             let arr =[]
-            for(i of this.funcionarios)
-                arr.push(totalVendasRel(dados,this.dataInicio,i.codfun))
-            return arr
+            let soma = 0
+            let final = []
+            for(i of this.funcionarios){
+                arr = this.vendasHora(i.codfun)
+                for (i of arr){
+                    soma = soma + i
+                }
+                final.push(soma)
+                soma = 0
+            }
+            console.log(final)
+            return final
         },
         vendasHora(cod){
             let venda = []
@@ -522,8 +531,8 @@ function totalVendas(dados,mes,cod){
     let  b = [],c,d;
     d = mes.split("-")
     let e = moment(mes,"YYYY-MM")
-    for(let i = 0;i<e.daysInMonth();i++){
-        if(i<9){
+    for(let i = 1;i<=e.daysInMonth();i++){
+        if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
             c = `${d[0]}-${d[1]}-${i}`
@@ -541,8 +550,8 @@ function totalHoras(dados,mes,cod){
     let  b = [],c,d;
     d = mes.split("-")
     let e = moment(mes,"YYYY-MM")
-    for(let i = 0;i<e.daysInMonth();i++){
-        if(i<9){
+    for(let i = 1;i<=e.daysInMonth();i++){
+        if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
             c = `${d[0]}-${d[1]}-${i}`
