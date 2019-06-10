@@ -38,10 +38,10 @@ def home():
 ###### CONSULTA DE VENDAS #############################
 
 @jwt_required()
-@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
-def api(codfun,data_inicio,data_fim):
+@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>/<hora_inicio>/<hora_fim>')
+def api(codfun,data_inicio,data_fim,hora_inicio,hora_fim):
     orm = Orm()
-    dado = orm.importaDados(codfun,data_inicio,data_fim)
+    dado = orm.importaDados(codfun,data_inicio,data_fim,hora_inicio,hora_fim)
     dados = []
 
     for i in dado:

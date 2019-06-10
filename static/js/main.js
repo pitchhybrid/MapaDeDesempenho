@@ -58,6 +58,8 @@ var relatorio = Vue.component("relatorio",{
             dadosvenda:[],
             dataInicio:"",
             dataFim:"",
+            horaInicio:"",
+            horaFim:"",
             mesRel:"",
             cabecalho:[],
             dadosMedia:[]
@@ -89,7 +91,7 @@ var relatorio = Vue.component("relatorio",{
 
             axios({
                     method: 'get',
-                    url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio +'/'+this.dataFim
+                    url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim + '/' + this.horaInicio + '/' + this.horaFim
                     }).then(function(response){
                             vm.dados = response.data
                             vm2.popular()
@@ -151,7 +153,6 @@ var relatorio = Vue.component("relatorio",{
                 final.push(soma)
                 soma = 0
             }
-            console.log(final)
             return final
         },
         vendasHora(cod){

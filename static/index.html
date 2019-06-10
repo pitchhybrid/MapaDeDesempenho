@@ -46,7 +46,7 @@
     </template>
 
     <template id="relatorio-gen">
-        <div class="box mb-4">
+        <div class="box mb-4 border">
             <div class="table-responsive">
                 <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
                 <table class="table table-hover">
@@ -75,18 +75,32 @@
     <template id="relatorio">
         <div class="container">
             <div class="row justify-content-center mb-3">
-                <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar</button>
-                    <div class="col-3">
-                        <input type="date" v-model="dataInicio" class="form-control"/>
-                    </div>
-                        <button class="btn btn-success" @click.stop.prevent="capturar()">Carregar</button>
-                    <div class="col-3">
-                        <input type="date" v-model="dataFim"class="form-control"/>
-                    </div>
-                <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar</button>
+                <div class="col-3">
+                    <label for="inicio"> Data Inicio</label>
+                    <input type="date" v-model="dataInicio" class="form-control mb-2"/>
+                </div>
+                <div class="col-3">
+                    <label for="fim">Data Final</label>
+                    <input type="date" v-model="dataFim"class="form-control"/>
+                </div>
+                <div class="col-2">
+                    <label for="inicio">Hora Inicio</label>
+                    <input type="text" v-model="horaInicio" class="form-control mb-2"/>
+                </div>
+                <div class="col-2">
+                    <label for="final">Hora Final</label>
+                    <input type="text" v-model="horaFim" class="form-control"/>
+                </div>
             </div>
+            <div class="row justify-content-around mb-4">
+                <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar</button>
+                <button class="btn btn-success" @click.stop.prevent="capturar()">Carregar</button>
+                <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar</button>
+               
+            </div>
+                
             <div id="relatorioExportar">
-                <div class="box mb-3">
+                <div class="box border mb-3">
                     <p style="text-align:center;font-size: 2.5em" class="display-4">{{mesRel}}</p>
                 </div>
                 <grafico></grafico>
@@ -100,14 +114,14 @@
     </template>
 
     <template id="grafico">
-        <div class="box mb-3">
+        <div class="box border mb-3">
             <canvas id="chart"></canvas>
         </div>
     </template>
 
     <template id="media-global">
 
-        <div class="box">
+        <div class="box border">
                 <p style="text-align:center;font-size: 2.5em" class="display-4">MEDIA GLOBAL</p>
             <div class="justify-content-center">
                 <table class="table table-hover">
@@ -140,7 +154,7 @@
 
     <template id="gerenciamento">
         
-        <div class="container w-50 p-4 box">
+        <div class="container w-50 p-4 box border">
             <gerenciamento-gen :titulo="'Usuarios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
            
             <gerenciamento-gen :titulo="'Funcionarios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
@@ -349,7 +363,7 @@
 
     <template id="login">
         <div class="container">
-            <div class="box login">
+            <div class="box border login">
                 <img class="mb-5 logo" src="../static/img/logo.png" width="200px">
                 <form>
 
