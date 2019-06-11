@@ -179,7 +179,7 @@ var relatorio = Vue.component("relatorio",{
                     v = venda[i]
                     t = timeToDecimal(tempo[i])
                     if(t < 1){
-                        t = 1
+                        t = 0;
                     }
                     d = Math.ceil( v / t)
                     if(!isFinite(d)){
