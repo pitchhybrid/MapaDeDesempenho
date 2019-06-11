@@ -2,8 +2,8 @@ import fdb
 
 class Orm(object):
     #Informacoes do banco alvo
-    nome_banco = '/opt/BD.ib' #LOCAL
-    # nome_banco = r"fortaleza232.dlinkddns.com/3050:C:\TESTE\TESTE.ib" #SERVIDOR
+    # nome_banco = '/opt/BD.ib' #LOCAL
+    nome_banco = r"fortaleza232.dlinkddns.com/3050:C:\TESTE\TESTE.ib" #SERVIDOR
     login_banco = 'SYSDBA'
     senha_banco = 'masterkey'
     #construtor da classe
