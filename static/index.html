@@ -13,7 +13,7 @@
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
     <script src="../static/js/all.js"></script>
-    <script src="../static/js/vue.js"></script>
+    <script src="../static/js/vue.min.js"></script>
     <script src="../static/js/vue-router.js"></script>
     <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
@@ -40,6 +40,7 @@
     <template id="navbar">
         
             <nav class="navbar bg-blue mb-4">            
+                
                 <button class="btn btn-outline-light" @click.stop.prevent="toggle()">Menu</button>
             </nav>
             
@@ -336,12 +337,13 @@
     <template id="lateralmenu">
             
 
-            <div class="d-flex toggled" id="wrapper">
+            <div class="d-flex" id="wrapper">
 
                     <!-- Sidebar -->
                     <div class="bg-roxo border-right " id="sidebar-wrapper">
                       <div class="list-group list-group-flush bg-roxo">
                         <router-link to="/" class="list-group-item list-group-item-action"><img id="logo" src="../static/img/logo.png" alt="Logo"></router-link>
+                        <p style="text-align:center;font-size: 1.1em" class="list-group-item list-group-item-action">{{usuario | toUpper}}</p>
                         <router-link to="/" class="list-group-item list-group-item-action">Relatorio</router-link>
                         <router-link to="/Gerenciamento" class="list-group-item list-group-item-action">Gerenciamento</router-link>
                         <a href="#" class="list-group-item list-group-item-action" @click.stop.prevent="logout()">Sair</a>

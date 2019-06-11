@@ -1,4 +1,5 @@
 var dados = []
+var user = localStorage.getItem("USUARIO")
 axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
 axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
 
@@ -12,6 +13,7 @@ var login = Vue.component("login",{
     },
     methods:{
         login(){
+            vm = this
             axios({
                     method: 'post',
                     url: '/auth',
@@ -20,8 +22,10 @@ var login = Vue.component("login",{
                         password: this.password
                 }
                 }).then(function(response){
-                        this.AUTH_TOKEN = response.data.access_token;
+                        let AUTH_TOKEN = response.data.access_token;
                         localStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
+                        localStorage.setItem("USUARIO",vm.username)
+                        window.user = localStorage.getItem("USUARIO");
                         app.$data.login = localStorage.getItem("AUTH_TOKEN")
                         axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
                         axios.defaults.headers.common['Content-Type'] = 'application/json';
@@ -169,8 +173,15 @@ var relatorio = Vue.component("relatorio",{
                     tempo = i.dados
                 }
                 let d 
+                let t
+                let v
                 for(i in tempo){
-                    d = Math.ceil(venda[i] / timeToDecimal(tempo[i]))
+                    v = venda[i]
+                    t = timeToDecimal(tempo[i])
+                    if(t < 1){
+                        t = 1
+                    }
+                    d = Math.ceil( v / t)
                     if(!isFinite(d)){
                         final.push(0)
                     }else{
@@ -358,10 +369,21 @@ var gerenciamento = Vue.component("gerenciamento",{
 
 var lateralmenu = Vue.component("lateralmenu",{ 
     template:"#lateralmenu",
+    data(){
+        return{
+            usuario:localStorage.getItem("USUARIO")
+        }
+    },
+    filters:{
+        toUpper(str){
+            return str.toUpperCase()
+        }
+    },
     methods:{
         logout(){
             app.login = null;
             localStorage.removeItem("AUTH_TOKEN")
+            localStorage.removeItem("USUARIO")
             AUTH_TOKEN = null;
             axios.defaults.headers.common['Authorization'] = null;
             window.location.href = "/"; 
@@ -398,7 +420,7 @@ var router = new VueRouter({
     ]
 });
 
-var app = new Vue({ el:"#app", router, data:{ login: localStorage.getItem("AUTH_TOKEN")} });
+var app = new Vue({ el:"#app", router, data:{ login: localStorage.getItem("AUTH_TOKEN") } });
 
 function getTimeInterval(tempoMenor,tempoMaior){
     let a = String(tempoMenor).split(" ")
