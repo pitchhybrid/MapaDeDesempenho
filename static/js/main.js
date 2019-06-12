@@ -93,6 +93,7 @@ var relatorio = Vue.component("relatorio",{
             for(i of this.funcionarios)
             fun.push(i.codfun)
 
+            if(this.horaInicio && this.horaFim){
             axios({
                     method: 'get',
                     url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim + '/' + this.horaInicio + '/' + this.horaFim
@@ -100,6 +101,16 @@ var relatorio = Vue.component("relatorio",{
                             vm.dados = response.data
                             vm2.popular()
                     }).catch(err =>console.log(err))
+            }
+            else{
+            axios({
+                method: 'get',
+                url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim
+                }).then(function(response){
+                        vm.dados = response.data
+                        vm2.popular()
+                }).catch(err =>console.log(err))
+            }
             },
         popular(){
             this.mesRel = getMes(this.dataInicio)
@@ -147,17 +158,10 @@ var relatorio = Vue.component("relatorio",{
         },
         totais(){
             let arr =[]
-            let soma = 0
-            let final = []
-            for(i of this.funcionarios){
-                arr = this.vendasHora(i.codfun)
-                for (i of arr){
-                    soma = soma + i
+                for (i of this.dadosMedia){
+                    arr.push(i.dados)
                 }
-                final.push(soma)
-                soma = 0
-            }
-            return final
+            return arr
         },
         vendasHora(cod){
             let venda = []
@@ -610,7 +614,7 @@ function graficoFun(nomes,dados){
         data: {
             labels: nomes,
             datasets: [{
-                label: "Quantidade de Vendas",
+                label: "Media Global",
                 data: dados,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
@@ -632,6 +636,7 @@ function graficoFun(nomes,dados){
             }]
         },
         options: {
+            responsive:true,
             scales: {
                 xAxes: [{
                     ticks: {

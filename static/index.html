@@ -76,19 +76,19 @@
     <template id="relatorio">
         <div class="container">
             <div class="row justify-content-center mb-3">
-                <div class="col-3">
-                    <label for="inicio"> Data Inicio</label>
+                <div class="col-sm">
+                    <label for="inicio"> Data Inicial</label>
                     <input type="date" v-model="dataInicio" class="form-control mb-2"/>
                 </div>
-                <div class="col-3">
+                <div class="col-sm">
                     <label for="fim">Data Final</label>
                     <input type="date" v-model="dataFim"class="form-control"/>
                 </div>
-                <div class="col-2">
-                    <label for="inicio">Hora Inicio</label>
+                <div class="col-sm">
+                    <label for="inicio">Hora Inicial</label>
                     <input type="text" v-model="horaInicio" class="form-control mb-2"/>
                 </div>
-                <div class="col-2">
+                <div class="col-sm">
                     <label for="final">Hora Final</label>
                     <input type="text" v-model="horaFim" class="form-control"/>
                 </div>
@@ -179,14 +179,14 @@
                         <th>USUARIO</th>
                         <th>NOME</th>
                         <th>EMAIL</th>
-                        <th>ACOES</th>
+                        <th>A&Ccedil;&Otilde;ES</th>
                     </tr>
                 </thead>
                 <thead v-if="funcionarios">
                     <tr>
                         <th>ID</th>
                         <th>FUNCIONARIO</th>
-                        <th>ACOES</th>
+                        <th>A&Ccedil;&Otilde;ES</th>
                     </tr>
                 </thead>
                 <tbody v-if="usuarios">
@@ -243,7 +243,7 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Edição</h5>
+                            <h5 class="modal-title">Edi&ccedil;&atilde;o</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                             </button>

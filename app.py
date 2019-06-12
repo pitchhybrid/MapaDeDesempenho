@@ -41,7 +41,7 @@ def home():
 @app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>/<hora_inicio>/<hora_fim>')
 def api(codfun,data_inicio,data_fim,hora_inicio,hora_fim):
     orm = Orm()
-    dado = orm.importaDados(codfun,data_inicio,data_fim,hora_inicio,hora_fim)
+    dado = orm.importaDadosHora(codfun,data_inicio,data_fim,hora_inicio,hora_fim)
     dados = []
 
     for i in dado:
@@ -50,6 +50,18 @@ def api(codfun,data_inicio,data_fim,hora_inicio,hora_fim):
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype='application/json')
 
+@jwt_required()
+@app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
+def apiHora(codfun,data_inicio,data_fim):
+    orm = Orm()
+    dado = orm.importaDadosData(codfun,data_inicio,data_fim)
+    dados = []
+
+    for i in dado:
+        dados.append({'codfun':str(i[0]),'timestamp':str(i[1]) + " " + str(i[2])})
+    
+    json_data = json.dumps(dados)
+    return Response(json_data,200,mimetype='application/json')
 ########################## GERENCIA DE FUNCIONARIOS ##############################
 
 @jwt_required()
