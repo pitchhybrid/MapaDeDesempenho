@@ -36,22 +36,8 @@ var login = Vue.component("login",{
             }
     }});
 
-var media = Vue.component("media-global",{
-    template:"#media-global",
-    props:{
-        entrada:Array
-    }
-})
-
-var relatorio_gen =  Vue.component("relatorio-gen",{
-    template:"#relatorio-gen",
-    props:{
-        titulo:String,
-        entrada:Array,
-        cabecalho:Array
-    }
-})
-
+var media = Vue.component("media-global",{ template:"#media-global", props:{ entrada:Array } })
+var relatorio_gen =  Vue.component("relatorio-gen",{ template:"#relatorio-gen", props:{ titulo:String, entrada:Array, cabecalho:Array } } )
 var relatorio = Vue.component("relatorio",{
     template:"#relatorio",
     data(){
@@ -79,7 +65,7 @@ var relatorio = Vue.component("relatorio",{
                 }).catch(err => console.error(err))
     },
     beforeUpdate(){
-        graficoFun(this.toArray(),[])
+        graficoFun(this.toArray(),this.totais())
     },
     updated(){
         graficoFun(this.toArray(),this.totais())
@@ -137,7 +123,7 @@ var relatorio = Vue.component("relatorio",{
             this.mesRel= null
             this.cabecalho= []
             this.dadosMedia = []
-            graficoFun(this.toArray(),[])
+            graficoFun(null,null)
         },
         exportar(){
             var element = document.getElementById("relatorioExportar")
@@ -454,43 +440,30 @@ function getMes(data){
     let mes = a.month()
     let ano = a.year()
     switch (mes) {
-        
         case 0: return "JANEIRO - " + ano
             break;
-        
         case 1: return "FEVEREIRO - " + ano
             break;
-        
         case 2: return "MARÇO - " + ano
             break;
-        
         case 3: return "ABRIL - " + ano
             break;
-        
         case 4: return "MAIO - " + ano
             break;
-        
         case 5: return "JUNHO - " + ano
             break;
-        
         case 6: return "JULHO - " + ano
             break;
-        
         case 7: return "AGOSTO - " + ano
             break;
-        
         case 8: return "SETEMBRO - " + ano
             break;
-        
         case 9: return "OUTUBRO - " + ano
             break;
-        
         case 10: return "NOVEMBRO - " + ano
             break;
-        
         case 11: return "DEZEMBRO - " + ano
             break;
-        
         default: return "FALHA"
             break;
     }
@@ -521,7 +494,6 @@ function filtroHora(dados,periodo,cod){
             if (c == periodo)
             d.push(a);  
         }
-        
     }
     return d;
 }
@@ -529,7 +501,6 @@ function filtroHora(dados,periodo,cod){
 function totalVendasUnitario(dados,periodo,cod){
     let a,b,c,e;
     let d = [];
-
     for(i of dados){
         if(i.codfun == cod){
         a = i.timestamp;
@@ -565,11 +536,8 @@ function totalVendas(dados,mes,cod){
             c = `${d[0]}-${d[1]}-${i}`
         }
         b.push(totalVendasUnitario(dados,c,cod))
-
     }
-    
     return b
-
 }
 
 function totalHoras(dados,mes,cod){
@@ -586,7 +554,7 @@ function totalHoras(dados,mes,cod){
         a = filtroHora(dados,c,cod)
         b.push(getTimeInterval(a[0],a[(a.length - 1)]))
     }
-    return b
+        return b
     }
 
 function totalHorasSum(dados,mes,cod){
@@ -595,20 +563,17 @@ function totalHorasSum(dados,mes,cod){
     for(i of a){
         total = total + timeToDecimal(i)
     }
-    
     return Math.ceil(total)
 }
 
 function timeToDecimal(t) {
-var arr = t.split(':');
-var dec = parseInt((arr[1]/6)*10, 10);
-
-return parseFloat(parseInt(arr[0], 10) + '.' + (dec<10?'0':'') + dec);
+    var arr = t.split(':');
+    var dec = parseInt((arr[1]/6)*10, 10);
+    return parseFloat(parseInt(arr[0], 10) + '.' + (dec<10?'0':'') + dec);
 } 
 
 function graficoFun(nomes,dados){
     var ctx = document.getElementById('chart');
-
     var myChart = new Chart(ctx, {
         type: 'horizontalBar',
         data: {
@@ -632,7 +597,7 @@ function graficoFun(nomes,dados){
                     'rgba(75, 192, 192, 1)',
                     'rgba(153, 102, 255, 1)',
                     'rgba(255, 159, 64, 1)'],
-                borderWidth: 2
+                borderWidth: 1
             }]
         },
         options: {
@@ -646,6 +611,10 @@ function graficoFun(nomes,dados){
             }
         }
     })
+    myChart.update()
+    if(!nomes && !dados){
+        myChart.destroy()
+    }
 }
 
 function mediaG(dados,mes,cod){

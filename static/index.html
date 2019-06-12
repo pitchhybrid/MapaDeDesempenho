@@ -48,8 +48,8 @@
 
     <template id="relatorio-gen">
         <div class="box mb-4 border">
-            <div class="table-responsive">
                 <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
+            <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
                         <tr>
@@ -121,8 +121,7 @@
     </template>
 
     <template id="media-global">
-
-        <div class="box border">
+        <div class="box border mb-5">
                 <p style="text-align:center;font-size: 2.5em" class="display-4">MEDIA GLOBAL</p>
             <div class="justify-content-center">
                 <table class="table table-hover">
@@ -149,16 +148,15 @@
                     </tfoot>
                 </table>
             </div>
-            
         </div>
     </template>
 
     <template id="gerenciamento">
         
         <div class="container w-50 p-4 box border">
-            <gerenciamento-gen :titulo="'Usuarios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
+            <gerenciamento-gen :titulo="'Usu&aacute;rios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
            
-            <gerenciamento-gen :titulo="'Funcionarios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
+            <gerenciamento-gen :titulo="'Funcion&aacute;rios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
 
         </div>
 
@@ -176,7 +174,7 @@
             <table class="table table-hover">
                 <thead v-if="usuarios">
                     <tr>
-                        <th>USUARIO</th>
+                        <th>USU&Aacute;RIO</th>
                         <th>NOME</th>
                         <th>EMAIL</th>
                         <th>A&Ccedil;&Otilde;ES</th>
@@ -185,7 +183,7 @@
                 <thead v-if="funcionarios">
                     <tr>
                         <th>ID</th>
-                        <th>FUNCIONARIO</th>
+                        <th>FUNCION&Aacute;RIO</th>
                         <th>A&Ccedil;&Otilde;ES</th>
                     </tr>
                 </thead>
@@ -225,14 +223,14 @@
                 <tfoot v-if="usuarios">
                     <tr>
                         <th colspan="3" style="text-align: center">
-                            {{usuarios.length}} - USUARIOS
+                            {{usuarios.length}} - USU&Aacute;RIOS
                         </th>
                     </tr>
                 </tfoot>
                 <tfoot v-if="funcionarios">
                     <tr>
                         <th colspan="3" style="text-align: center;transform: translateX(-13%)">
-                            {{funcionarios.length}} - FUNCIONARIOS
+                            {{funcionarios.length}} - FUNCION&Aacute;RIOS
                         </th>
                     </tr>
                 </tfoot>

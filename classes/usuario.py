@@ -65,7 +65,7 @@ class Usuario(object):
     def remFuncionario(self,codfun):
         with self.conn:
             c = self.conn.cursor()
-            c.execute("DELETE FROM mapa_funcionarios where cod=?",(codfun))
+            c.execute("DELETE FROM mapa_funcionarios where cod=" + str(codfun))
 
     def editaFuncionario(self,codfun,nomefun):
         with self.conn:
