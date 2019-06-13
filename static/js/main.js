@@ -69,7 +69,6 @@ var relatorio = Vue.component("relatorio",{
     },
     updated(){
         graficoFun(this.toArray(),this.totais())
-        
     },
     methods:{
         capturar(){
@@ -101,15 +100,14 @@ var relatorio = Vue.component("relatorio",{
         popular(){
             this.mesRel = getMes(this.dataInicio)
             window.mesRel = getMes(this.dataInicio)
-            this.cabecalho = ["ID","FUNCIONARIO"].concat(getDays(this.dataInicio))
-            var d = String(this.dataInicio).replace("-01","")
-            this.dadosMedia = this.mediaGlobal(d)
+            this.cabecalho = ["ID","FUNCIONARIO"].concat(getDays(this.dataInicio,this.dataFim))
+            this.dadosMedia = this.mediaGlobal(this.dataInicio,this.dataFim)
             for(i of this.funcionarios){
-                this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalVendas(dados,d,i.codfun)})
+                this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalVendas(dados,this.dataInicio,this.dataFim,i.codfun)})
             }
             
             for(i of this.funcionarios){
-                this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalHoras(dados,d,i.codfun)})
+                this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalHoras(dados,this.dataInicio,this.dataFim,i.codfun)})
             }
             
             for(i of this.funcionarios){
@@ -181,10 +179,10 @@ var relatorio = Vue.component("relatorio",{
                 
             return final                  
         },
-        mediaGlobal(mes){
+        mediaGlobal(dataI,dataF){
             let b = []
             for (i of this.funcionarios){
-                b.push({codfun:i.codfun,nomefun:i.nomefun,dados:mediaG(dados,mes,i.codfun)})
+                b.push({codfun:i.codfun,nomefun:i.nomefun,dados:mediaG(dados,dataI,dataF,i.codfun)})
             }
             return b
             
@@ -426,12 +424,14 @@ function getTimeInterval(tempoMenor,tempoMaior){
     }
 }
 
-function getDays(data){
+function getDays(dataI,dataF){
     let arr = []
-    let max = moment(data,"YYYY-MM-DD").daysInMonth()
-    for(i=1;i<=max;i++)
+    let dataInicio = String(dataI).split("-")
+    let dataFim = String(dataF).split("-")
+    // let max = moment(data,"YYYY-MM-DD").daysInMonth()
+    for(i=dataInicio[2].replace("0","");i<=dataFim[2];i++){
         arr.push(i)
-    
+    }    
     return arr
 }
 
@@ -514,8 +514,8 @@ function totalVendasUnitario(dados,periodo,cod){
     return d.length;
 }
 
-function totalVendasRel(dados,periodo,cod){
-    let a = totalVendas(dados,periodo,cod)
+function totalVendasRel(dados,dataI,dataF,cod){
+    let a = totalVendas(dados,dataI,dataF,cod)
     let total = 0;
     for(i of a){
         total = total + i
@@ -523,13 +523,13 @@ function totalVendasRel(dados,periodo,cod){
     return total
 }
 
-function totalVendas(dados,mes,cod){
+function totalVendas(dados,dataI,dataF,cod){
 
     let a = [];
-    let  b = [],c,d;
-    d = mes.split("-")
-    let e = moment(mes,"YYYY-MM")
-    for(let i = 1;i<=e.daysInMonth();i++){
+    let b = [],c;
+    let d = String(dataI).split("-")
+    let e = String(dataF).split("-")
+    for(let i = d[2].replace("0","");i<=e[2];i++){
         if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
@@ -540,25 +540,26 @@ function totalVendas(dados,mes,cod){
     return b
 }
 
-function totalHoras(dados,mes,cod){
+function totalHoras(dados,dataI,dataF,cod){
     let a = [];
-    let  b = [],c,d;
-    d = mes.split("-")
-    let e = moment(mes,"YYYY-MM")
-    for(let i = 1;i<=e.daysInMonth();i++){
+    let b = [],c;
+    let d = String(dataI).split("-")
+    let e = String(dataF).split("-")
+    for(let i = d[2].replace("0","");i<=e[2];i++){
         if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
             c = `${d[0]}-${d[1]}-${i}`
         }
+
         a = filtroHora(dados,c,cod)
         b.push(getTimeInterval(a[0],a[(a.length - 1)]))
     }
         return b
     }
 
-function totalHorasSum(dados,mes,cod){
-    let a = totalHoras(dados,mes,cod)
+function totalHorasSum(dados,dataI,dataF,cod){
+    let a = totalHoras(dados,dataI,dataF,cod)
     let total = 0;
     for(i of a){
         total = total + timeToDecimal(i)
@@ -617,9 +618,9 @@ function graficoFun(nomes,dados){
     }
 }
 
-function mediaG(dados,mes,cod){
-    var a = totalVendasRel(dados,mes,cod)
-    var b = totalHorasSum(dados,mes,cod)
+function mediaG(dados,dataI,dataF,cod){
+    var a = totalVendasRel(dados,dataI,dataF,cod)
+    var b = totalHorasSum(dados,dataI,dataF,cod)
 
     return (a/b).toFixed(2)
 }

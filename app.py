@@ -1,17 +1,20 @@
 from flask import Flask,request,Response,json
+from flask_cors import CORS,cross_origin
 from flask_jwt import JWT,jwt_required,current_identity
 from classes.orm import Orm
 from classes.usuario import Usuario
 from datetime import timedelta
+from os import urandom
 
 ################### CONFIGURAÇOES DA APLICAÇÂO ################################
 
 app = Flask("mapa de desempenho")
 app.debug = False
-app.secret_key = 'Mht(>0[w[s5a~s*q5[##[3zT^6}rlT'
+app.secret_key = str(urandom(24))
 app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1000)
 app.config['JWT_VERIFY_EXPIRATION'] = False
 app.config['JWT_AUTH_URL_RULE'] = "/api/auth"
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 ################### METODOS PARA A JWT ########################################
 
@@ -27,16 +30,19 @@ def identity(payload):
     identidade = userid.getUsuario(user[1])
     return identidade
 
-jwt = JWT(app,authenticate,identity)
+JWT(app,authenticate,identity)
+CORS(app)
 
 ################## ROTAS (ENDPOINTS) #########################################
 #### RAIZ (HOME) #######
 @app.route('/')
 def home():
-    return open("static/index.html","r").read()
+    with open("static/index.html") as home:
+        return home.read()
 
 ###### CONSULTA DE VENDAS #############################
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>/<hora_inicio>/<hora_fim>')
 def api(codfun,data_inicio,data_fim,hora_inicio,hora_fim):
@@ -50,6 +56,7 @@ def api(codfun,data_inicio,data_fim,hora_inicio,hora_fim):
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype='application/json')
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/consulta/<codfun>/<data_inicio>/<data_fim>')
 def apiHora(codfun,data_inicio,data_fim):
@@ -64,6 +71,7 @@ def apiHora(codfun,data_inicio,data_fim):
     return Response(json_data,200,mimetype='application/json')
 ########################## GERENCIA DE FUNCIONARIOS ##############################
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/consulta/funcionarios')
 def funcionarios():
@@ -77,6 +85,7 @@ def funcionarios():
     json_data = json.dumps(dados)
     return Response(json_data,200,mimetype='application/json')
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/consulta/funcionario/<codfun>',methods=['GET'])
 def funcionario(codfun):
@@ -85,6 +94,7 @@ def funcionario(codfun):
     json_data = json.dumps({'codfun':str(dado[0][0]),'nomefun':str(dado[0][1])})
     return Response(json_data,200,mimetype='application/json')
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/funcionario/cadastrar', methods=['POST'])
 def cadastrar_funcionario():
@@ -93,6 +103,7 @@ def cadastrar_funcionario():
     usuario.addFuncionario(json_data["codfun"],json_data["nomefun"])
     return Response("",200)
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/funcionario/atualizar', methods=['POST'])
 def atualizar_funcionario():
@@ -101,6 +112,7 @@ def atualizar_funcionario():
     usuario.editaFuncionario(json_data["codfun"],json_data["nomefun"])
     return Response("",200)
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/funcionario/deletar', methods=['POST'])
 def deletar_funcionario():
@@ -119,6 +131,7 @@ def user():
 def api_root():
     return ""
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/user/cadastrar', methods=['POST'])
 def cadastrar():
@@ -127,6 +140,7 @@ def cadastrar():
     usuario.addUsuario(json_data["login"],json_data["senha"],json_data["nome"], json_data["email"])
     return Response("",200)
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/user/atualizar', methods=['POST'])
 def atualizar():
@@ -135,6 +149,7 @@ def atualizar():
     usuario.editaUsuario(json_data["login"],json_data["senha"],json_data["nome"], json_data["email"],json_data["cod"])
     return Response("",200)
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/user/deletar', methods=['POST'])
 def deletar():
@@ -143,6 +158,7 @@ def deletar():
     usuario.remUsuario(json_data["cod"])
     return Response("",200)
 
+@cross_origin()
 @jwt_required()
 @app.route('/api/consulta/usuarios')
 def getUser():

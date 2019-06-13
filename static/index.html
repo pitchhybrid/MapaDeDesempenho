@@ -48,7 +48,7 @@
 
     <template id="relatorio-gen">
         <div class="box mb-4 border">
-                <p style="text-align:center;font-size: 2.5em" class="display-4">{{titulo}}</p>
+                <p style="text-align:center;font-size: 2em" class="display-4">{{titulo}}</p>
             <div class="table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -58,14 +58,14 @@
                     </thead>
                     <tbody>
                         <tr v-for="(en,index) in entrada">
-                            <td>{{en.codfun}}</td>
-                            <td>{{en.nomefun}}</td>
-                            <td v-for="dado in en.dados">{{dado}}</td>
+                            <td class="col">{{en.codfun}}</td>
+                            <td class="col">{{en.nomefun}}</td>
+                            <td class="col teste" v-for="dado in en.dados">{{dado}}</td>
                         </tr>
                     </tbody>
                     <tfoot>
                         <tr style="text-align: center">
-                            <th :colspan="cabecalho.length + 1" >{{titulo}}</th>
+                            <th class="col" :colspan="cabecalho.length + 1" >{{titulo}}</th>
                         </tr>
                     </tfoot>
                 </table>    
@@ -94,9 +94,9 @@
                 </div>
             </div>
             <div class="row justify-content-around mb-4">
-                <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar</button>
-                <button class="btn btn-success" @click.stop.prevent="capturar()">Carregar</button>
-                <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar</button>
+                <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar Relatorio</button>
+                <button class="btn btn-success" @click.stop.prevent="capturar()">Gerar Relatorio</button>
+                <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar Relatorio</button>
                
             </div>
                 
@@ -122,7 +122,7 @@
 
     <template id="media-global">
         <div class="box border mb-5">
-                <p style="text-align:center;font-size: 2.5em" class="display-4">MEDIA GLOBAL</p>
+                <p style="text-align:center;font-size: 2em" class="display-4">MEDIA GLOBAL</p>
             <div class="justify-content-center">
                 <table class="table table-hover">
                     <thead>
@@ -153,7 +153,7 @@
 
     <template id="gerenciamento">
         
-        <div class="container w-50 p-4 box border">
+        <div class="container gerenciamento w-50 p-4 box border">
             <gerenciamento-gen :titulo="'Usu&aacute;rios'" :usuarios="usuarios"  id="usuario"></gerenciamento-gen>
            
             <gerenciamento-gen :titulo="'Funcion&aacute;rios'" :funcionarios="funcionarios" id="funcionario"></gerenciamento-gen>
@@ -171,7 +171,7 @@
                 <button class="btn btn-outline-secondary" data-toggle="modal" :data-target="'#novo' + id"><i class="fas fa-user-plus"></i></button>
             </template>
             <p class="display-4" style="font-size: 2.2em;text-align: center">{{titulo}}</p>
-            <table class="table table-hover">
+            <table class="table table-hover table-responsive-sm">
                 <thead v-if="usuarios">
                     <tr>
                         <th>USU&Aacute;RIO</th>
