@@ -1,14 +1,13 @@
 var dados = []
-var user = localStorage.getItem("USUARIO")
 axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
-axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
+axios.defaults.headers.common['Authorization'] = "JWT " + sessionStorage.getItem("AUTH_TOKEN");
 
 var login = Vue.component("login",{
     template:"#login",
     data(){
         return{
-            username: null,
-            password: null
+            username: "",
+            password: ""
         }
     },
     methods:{
@@ -23,11 +22,10 @@ var login = Vue.component("login",{
                 }
                 }).then(function(response){
                         let AUTH_TOKEN = response.data.access_token;
-                        localStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
-                        localStorage.setItem("USUARIO",vm.username)
-                        window.user = localStorage.getItem("USUARIO");
-                        app.$data.login = localStorage.getItem("AUTH_TOKEN")
-                        axios.defaults.headers.common['Authorization'] = "JWT " + localStorage.getItem("AUTH_TOKEN");
+                        sessionStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
+                        sessionStorage.setItem("USUARIO",vm.username)
+                        app.$data.login = sessionStorage.getItem("AUTH_TOKEN")
+                        axios.defaults.headers.common['Authorization'] = "JWT " + sessionStorage.getItem("AUTH_TOKEN");
                         axios.defaults.headers.common['Content-Type'] = 'application/json';
                 }).catch(err => {
                     $("#erro").modal("toggle")
@@ -69,6 +67,18 @@ var relatorio = Vue.component("relatorio",{
     },
     updated(){
         graficoFun(this.toArray(),this.totais())
+
+        if(this.cabecalho.length != 0){
+            if(this.cabecalho.length < 18){
+                $(".QUANTIDADE_APROVAÇÃO")[0].style.width = "500px"
+                $(".VENDAS_POR_HORA")[0].style.width = "500px"
+            }
+            if(this.cabecalho.length < 10){
+                $(".QUANTIDADE_APROVAÇÃO")[0].style.width = "300px"
+                $(".VENDAS_POR_HORA")[0].style.width = "300px"
+            }
+        }
+       
     },
     methods:{
         capturar(){
@@ -79,24 +89,24 @@ var relatorio = Vue.component("relatorio",{
             fun.push(i.codfun)
 
             if(this.horaInicio && this.horaFim){
-            axios({
+                axios({
+                        method: 'get',
+                        url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim + '/' + this.horaInicio + '/' + this.horaFim
+                        }).then(function(response){
+                                vm.dados = response.data
+                                vm2.popular()
+                        }).catch(err =>console.log(err))
+            }
+            else{
+                axios({
                     method: 'get',
-                    url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim + '/' + this.horaInicio + '/' + this.horaFim
+                    url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim
                     }).then(function(response){
                             vm.dados = response.data
                             vm2.popular()
                     }).catch(err =>console.log(err))
             }
-            else{
-            axios({
-                method: 'get',
-                url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim
-                }).then(function(response){
-                        vm.dados = response.data
-                        vm2.popular()
-                }).catch(err =>console.log(err))
-            }
-            },
+        },
         popular(){
             this.mesRel = getMes(this.dataInicio)
             window.mesRel = getMes(this.dataInicio)
@@ -118,9 +128,13 @@ var relatorio = Vue.component("relatorio",{
             this.dadosqtd= []
             this.dadostempo= []
             this.dadosvenda= []
-            this.mesRel= null
+            this.mesRel= ""
             this.cabecalho= []
             this.dadosMedia = []
+            this.dataInicio = ""
+            this.dataFim = ""
+            this.horaInicio = ""
+            this.horaFim = ""
             graficoFun(null,null)
         },
         exportar(){
@@ -148,35 +162,29 @@ var relatorio = Vue.component("relatorio",{
             return arr
         },
         vendasHora(cod){
-            let venda = []
-            let tempo = []
-            let final = []
-                for(i of this.dadosqtd){
-                    if(i.codfun == cod)
-                    venda = i.dados
+            let venda = [],tempo = [],final = []
+            for(i of this.dadosqtd){
+                if(i.codfun == cod)
+                venda = i.dados
+            }
+            for(i of this.dadostempo){
+                if(i.codfun == cod)
+                tempo = i.dados
+            }
+            let d,t,v
+            for(i in tempo){
+                v = venda[i]
+                t = timeToDecimal(tempo[i])
+                if(t < 1){
+                    t = 0;
                 }
-                
-                for(i of this.dadostempo){
-                    if(i.codfun == cod)
-                    tempo = i.dados
+                d = Math.ceil( v / t)
+                if(!isFinite(d)){
+                    final.push(0)
+                }else{
+                    final.push(d)
                 }
-                let d 
-                let t
-                let v
-                for(i in tempo){
-                    v = venda[i]
-                    t = timeToDecimal(tempo[i])
-                    if(t < 1){
-                        t = 0;
-                    }
-                    d = Math.ceil( v / t)
-                    if(!isFinite(d)){
-                        final.push(0)
-                    }else{
-                        final.push(d)
-                    }
-                }
-                
+            }
             return final                  
         },
         mediaGlobal(dataI,dataF){
@@ -359,7 +367,7 @@ var lateralmenu = Vue.component("lateralmenu",{
     template:"#lateralmenu",
     data(){
         return{
-            usuario:localStorage.getItem("USUARIO")
+            usuario:sessionStorage.getItem("USUARIO")
         }
     },
     filters:{
@@ -370,9 +378,8 @@ var lateralmenu = Vue.component("lateralmenu",{
     methods:{
         logout(){
             app.login = null;
-            localStorage.removeItem("AUTH_TOKEN")
-            localStorage.removeItem("USUARIO")
-            AUTH_TOKEN = null;
+            sessionStorage.removeItem("AUTH_TOKEN")
+            sessionStorage.removeItem("USUARIO")
             axios.defaults.headers.common['Authorization'] = null;
             window.location.href = "/"; 
         }    
@@ -408,7 +415,7 @@ var router = new VueRouter({
     ]
 });
 
-var app = new Vue({ el:"#app", router, data:{ login: localStorage.getItem("AUTH_TOKEN") } });
+var app = new Vue({ el:"#app", router, data:{ login: sessionStorage.getItem("AUTH_TOKEN") } });
 
 function getTimeInterval(tempoMenor,tempoMaior){
     let a = String(tempoMenor).split(" ")
@@ -428,8 +435,7 @@ function getDays(dataI,dataF){
     let arr = []
     let dataInicio = String(dataI).split("-")
     let dataFim = String(dataF).split("-")
-    // let max = moment(data,"YYYY-MM-DD").daysInMonth()
-    for(i=dataInicio[2].replace("0","");i<=dataFim[2];i++){
+    for(i=dataInicio[2];i<=dataFim[2];i++){
         arr.push(i)
     }    
     return arr
@@ -529,7 +535,7 @@ function totalVendas(dados,dataI,dataF,cod){
     let b = [],c;
     let d = String(dataI).split("-")
     let e = String(dataF).split("-")
-    for(let i = d[2].replace("0","");i<=e[2];i++){
+    for(let i = d[2];i<=e[2];i++){
         if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
@@ -545,7 +551,7 @@ function totalHoras(dados,dataI,dataF,cod){
     let b = [],c;
     let d = String(dataI).split("-")
     let e = String(dataF).split("-")
-    for(let i = d[2].replace("0","");i<=e[2];i++){
+    for(let i = d[2];i<=e[2];i++){
         if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{

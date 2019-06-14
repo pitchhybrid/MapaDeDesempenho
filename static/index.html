@@ -49,8 +49,8 @@
     <template id="relatorio-gen">
         <div class="box mb-4 border">
                 <p style="text-align:center;font-size: 2em" class="display-4">{{titulo}}</p>
-            <div class="table-responsive">
-                <table class="table table-hover">
+            <div class="table-responsive" >
+                <table class="table table-hover" :class="titulo.replace(/ /g,'_')">
                     <thead>
                         <tr>
                             <th class="col" v-for="index in cabecalho" :key="index">{{index}}</th>
@@ -122,7 +122,7 @@
 
     <template id="media-global">
         <div class="box border mb-5">
-                <p style="text-align:center;font-size: 2em" class="display-4">MEDIA GLOBAL</p>
+                <p style="text-align:center;font-size: 2em" class="display-4">MEDIA PERIODO</p>
             <div class="justify-content-center">
                 <table class="table table-hover">
                     <thead>
