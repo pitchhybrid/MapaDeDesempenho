@@ -72,23 +72,3 @@ class Usuario(object):
             c = self.conn.cursor()
             c.execute("UPDATE mapa_funcionarios SET funcionario='"+ nomefun +"' WHERE cod=" + str(codfun))
 
-# def definirTempoMin(self):
-#     pass
-# def vizualizarRelatorio(self):
-#     pass
-# def exportaRelatorio(self):
-#     pass
-# def finalizaMes(self):
-#     pass
-# def configuraRelatorio(self):
-#     pass
-
-# usuario = Usuario()
-# usuario.addUsuario("messias","123456","messias","email@email")
-# usuario.editaUsuario("teste","teste","teste","teste@teste",2)
-# usuario.remUsuario(4)
-# print(usuario.getUsuarios())
-# if usuario.login("messias","123457"):
-#     print("logado")
-# else:
-#     print("erro")
