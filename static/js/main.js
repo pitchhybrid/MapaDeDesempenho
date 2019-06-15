@@ -1,4 +1,5 @@
-var dados = []
+var dados = [];
+var myChart;
 axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
 axios.defaults.headers.common['Authorization'] = "JWT " + sessionStorage.getItem("AUTH_TOKEN");
 
@@ -62,14 +63,11 @@ var relatorio = Vue.component("relatorio",{
                         vm.funcionarios = response.data
                 }).catch(err => console.error(err))
     },
-    beforeUpdate(){
-        graficoFun(this.toArray(),this.totais())
-    },
     updated(){
         graficoFun(this.toArray(),this.totais())
 
         if(this.cabecalho.length != 0){
-            if(this.cabecalho.length < 18){
+            if(this.cabecalho.length < 20){
                 $(".QUANTIDADE_APROVAÇÃO")[0].style.width = "500px"
                 $(".VENDAS_POR_HORA")[0].style.width = "500px"
             }
@@ -95,7 +93,7 @@ var relatorio = Vue.component("relatorio",{
                         }).then(function(response){
                                 vm.dados = response.data
                                 vm2.popular()
-                        }).catch(err =>console.log(err))
+                        }).catch(err =>alert("PREENCHA OS CAMPOS"))
             }
             else{
                 axios({
@@ -104,7 +102,7 @@ var relatorio = Vue.component("relatorio",{
                     }).then(function(response){
                             vm.dados = response.data
                             vm2.popular()
-                    }).catch(err =>console.log(err))
+                    }).catch(err =>alert("PREENCHA OS CAMPOS"))
             }
         },
         popular(){
@@ -135,7 +133,7 @@ var relatorio = Vue.component("relatorio",{
             this.dataFim = ""
             this.horaInicio = ""
             this.horaFim = ""
-            graficoFun(null,null)
+            window.myChart.destroy()
         },
         exportar(){
             var element = document.getElementById("relatorioExportar")
@@ -580,13 +578,13 @@ function timeToDecimal(t) {
 } 
 
 function graficoFun(nomes,dados){
-    var ctx = document.getElementById('chart');
-    var myChart = new Chart(ctx, {
+    const ctx = document.getElementById('chart');
+    myChart = new Chart(ctx, {
         type: 'horizontalBar',
         data: {
             labels: nomes,
             datasets: [{
-                label: "Media Global",
+                label: "MEDIA DE RENDIMENTO",
                 data: dados,
                 backgroundColor: [
                     'rgba(255, 99, 132, 0.2)',
@@ -618,10 +616,6 @@ function graficoFun(nomes,dados){
             }
         }
     })
-    myChart.update()
-    if(!nomes && !dados){
-        myChart.destroy()
-    }
 }
 
 function mediaG(dados,dataI,dataF,cod){
