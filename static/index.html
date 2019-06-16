@@ -12,7 +12,7 @@
 
     <link href="https://fonts.googleapis.com/css?family=Open+Sans&display=swap" rel="stylesheet">
     <script src="../static/js/all.js"></script>
-    <script src="../static/js/vue.min.js"></script>
+    <script src="../static/js/vue.js"></script>
     <script src="../static/js/vue-router.js"></script>
     <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
@@ -94,7 +94,7 @@
             </div>
             <div class="row justify-content-around mb-4">
                 <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar Relatorio</button>
-                <button class="btn btn-success" @click.stop.prevent="capturar()">Gerar Relatorio</button>
+                <button class="btn btn-success" data-toggle="modal" data-target="#GerarRelatorio">Gerar Relatorio</button>
                 <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar Relatorio</button>
                
             </div>
@@ -105,11 +105,33 @@
                 </div>
                 <grafico></grafico>
                 <relatorio-gen :cabecalho="cabecalho" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
-                <relatorio-gen :cabecalho="cabecalho" :entrada="dadosqtd"   :titulo="'QUANTIDADE APROVA&Ccedil;&Atilde;O'"></relatorio-gen>
+                <relatorio-gen :cabecalho="cabecalho" :entrada="dadosqtd"   :titulo="'VENDAS POR DIA'"></relatorio-gen>
                 <relatorio-gen :cabecalho="cabecalho" :entrada="dadosvenda" :titulo="'VENDAS POR HORA'"></relatorio-gen>
                 <media-global  :entrada="dadosMedia"></media-global> 
             </div>
-        </div>
+            
+            <div class="modal fade" id="GerarRelatorio" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="exampleModalLabel">Selecione os funcionarios</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                      </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-check" v-for="fun in funcionarios" :key="fun.codfun">
+                            <input type="checkbox" class="form-check-input" :value="fun.codfun" v-model="funcionariosSel">
+                            <label class="form-check-label" :for="fun.nomefun">{{fun.nomefun}}</label>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary mr-auto" @click.stop.prevent="selecionarTodos()">Selecionar Todos</button>
+                        <button type="button" class="btn btn-primary" @click.stop.prevent="capturar()">Gerar</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
         
     </template>
 

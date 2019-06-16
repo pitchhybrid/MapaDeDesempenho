@@ -1,10 +1,10 @@
-from flask import Flask,request,Response,json
+from flask import Flask,request,Response,json,send_from_directory
 from flask_cors import CORS,cross_origin
 from flask_jwt import JWT,jwt_required,current_identity
 from classes.orm import Orm
 from classes.usuario import Usuario
 from datetime import timedelta
-from os import urandom
+from os import urandom,path
 
 ################### CONFIGURAÇOES DA APLICAÇÂO ################################
 
@@ -130,6 +130,12 @@ def user():
 @app.route('/api')
 def api_root():
     return ""
+
+@app.route('/favicon.ico')
+def favicon():
+    return send_from_directory(path.join(app.root_path, 'static/img'),'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+###################################################################################
 
 @cross_origin()
 @jwt_required()

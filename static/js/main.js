@@ -42,6 +42,7 @@ var relatorio = Vue.component("relatorio",{
     data(){
         return{
             funcionarios:[],
+            funcionariosSel:[],
             dadosqtd:[],
             dadostempo:[],
             dadosvenda:[],
@@ -65,26 +66,33 @@ var relatorio = Vue.component("relatorio",{
     },
     updated(){
         graficoFun(this.toArray(),this.totais())
-
+        
         if(this.cabecalho.length != 0){
             if(this.cabecalho.length < 20){
-                $(".QUANTIDADE_APROVAÇÃO")[0].style.width = "500px"
+                $(".VENDAS_POR_DIA")[0].style.width = "500px"
                 $(".VENDAS_POR_HORA")[0].style.width = "500px"
             }
             if(this.cabecalho.length < 10){
-                $(".QUANTIDADE_APROVAÇÃO")[0].style.width = "300px"
+                $(".VENDAS_POR_DIA")[0].style.width = "300px"
                 $(".VENDAS_POR_HORA")[0].style.width = "300px"
             }
         }
        
     },
     methods:{
+        selecionarTodos(){
+            this.funcionariosSel = []
+            for(i of this.funcionarios){
+                this.funcionariosSel.push(i.codfun)
+            }
+        },
         capturar(){
+            $("#GerarRelatorio").modal("toggle")
             var vm = window
             var vm2 = this
             var fun = [];
-            for(i of this.funcionarios)
-            fun.push(i.codfun)
+            for(i of this.funcionariosSel)
+            fun.push(i)
 
             if(this.horaInicio && this.horaFim){
                 axios({
@@ -93,7 +101,10 @@ var relatorio = Vue.component("relatorio",{
                         }).then(function(response){
                                 vm.dados = response.data
                                 vm2.popular()
-                        }).catch(err =>alert("PREENCHA OS CAMPOS"))
+                        }).catch(err =>{
+                            console.log(err)
+                            alert("PREENCHA OS CAMPOS")
+                    })
             }
             else{
                 axios({
@@ -102,7 +113,10 @@ var relatorio = Vue.component("relatorio",{
                     }).then(function(response){
                             vm.dados = response.data
                             vm2.popular()
-                    }).catch(err =>alert("PREENCHA OS CAMPOS"))
+                    }).catch(err => {
+                        console.log(err)
+                        alert("PREENCHA OS CAMPOS")
+                    })
             }
         },
         popular(){
@@ -110,16 +124,20 @@ var relatorio = Vue.component("relatorio",{
             window.mesRel = getMes(this.dataInicio)
             this.cabecalho = ["ID","FUNCIONARIO"].concat(getDays(this.dataInicio,this.dataFim))
             this.dadosMedia = this.mediaGlobal(this.dataInicio,this.dataFim)
-            for(i of this.funcionarios){
-                this.dadosqtd.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalVendas(dados,this.dataInicio,this.dataFim,i.codfun)})
+            
+            for(i of this.funcionariosSel){
+                let cod = String(i)
+                this.dadostempo.push({codfun:cod,nomefun:this.getNome(i),dados:totalHoras(dados,this.dataInicio,this.dataFim,cod)})
+            }
+
+            for(i of this.funcionariosSel){
+                let cod = String(i)
+                this.dadosqtd.push({codfun:cod,nomefun:this.getNome(i),dados:totalVendas(dados,this.dataInicio,this.dataFim,cod)})
             }
             
-            for(i of this.funcionarios){
-                this.dadostempo.push({codfun:i.codfun,nomefun:i.nomefun,dados:totalHoras(dados,this.dataInicio,this.dataFim,i.codfun)})
-            }
-            
-            for(i of this.funcionarios){
-                this.dadosvenda.push({codfun:i.codfun,nomefun:i.nomefun,dados:this.vendasHora(i.codfun)})
+            for(i of this.funcionariosSel){
+                let cod = String(i)
+                this.dadosvenda.push({codfun:cod,nomefun:this.getNome(i),dados:this.vendasHora(cod)})
             }
         },
         limpar(){
@@ -133,6 +151,7 @@ var relatorio = Vue.component("relatorio",{
             this.dataFim = ""
             this.horaInicio = ""
             this.horaFim = ""
+            this.funcionariosSel = []
             window.myChart.destroy()
         },
         exportar(){
@@ -148,8 +167,8 @@ var relatorio = Vue.component("relatorio",{
         },
         toArray(){
             let arr = []
-            for(i of this.funcionarios)
-                arr.push(String(i.nomefun))
+            for(i of this.funcionariosSel)
+                arr.push(this.getNome(i))
             return arr
         },
         totais(){
@@ -187,11 +206,20 @@ var relatorio = Vue.component("relatorio",{
         },
         mediaGlobal(dataI,dataF){
             let b = []
-            for (i of this.funcionarios){
-                b.push({codfun:i.codfun,nomefun:i.nomefun,dados:mediaG(dados,dataI,dataF,i.codfun)})
+            for (i of this.funcionariosSel){
+                let cod = String(i)
+                b.push({codfun:cod,nomefun:this.getNome(i),dados:mediaG(dados,dataI,dataF,cod)})
             }
             return b
             
+        },
+        getNome(cod){
+            for(i of this.funcionarios){
+                if(i.codfun == cod){
+                    return i.nomefun
+                    break;
+                }
+            }
         }
     }
 });
@@ -434,7 +462,11 @@ function getDays(dataI,dataF){
     let dataInicio = String(dataI).split("-")
     let dataFim = String(dataF).split("-")
     for(i=dataInicio[2];i<=dataFim[2];i++){
-        arr.push(i)
+        if(i != "01"){
+            arr.push(i)
+        }else{
+            arr.push(1)
+        }
     }    
     return arr
 }
@@ -533,7 +565,7 @@ function totalVendas(dados,dataI,dataF,cod){
     let b = [],c;
     let d = String(dataI).split("-")
     let e = String(dataF).split("-")
-    for(let i = d[2];i<=e[2];i++){
+    for(let i = d[2].replace("0","");i<=e[2];i++){
         if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
@@ -549,7 +581,7 @@ function totalHoras(dados,dataI,dataF,cod){
     let b = [],c;
     let d = String(dataI).split("-")
     let e = String(dataF).split("-")
-    for(let i = d[2];i<=e[2];i++){
+    for(let i = d[2].replace("0","");i<=e[2];i++){
         if(i<10){
             c = `${d[0]}-${d[1]}-0${i}`
         }else{
