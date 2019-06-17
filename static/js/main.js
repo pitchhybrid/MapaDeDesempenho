@@ -30,7 +30,10 @@ var login = Vue.component("login",{
                     sessionStorage.setItem("USUARIO",vm.username)
                     app.$data.login = sessionStorage.getItem("AUTH_TOKEN")
                 },
-                dataType: ""
+                dataType: "",
+                error:function(response){
+                    $("#erro").modal("toggle")
+                }
                 });
             }
     }});
