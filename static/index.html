@@ -119,7 +119,7 @@
                         <span aria-hidden="true">&times;</span>
                       </button>
                     </div>
-                    <div class="modal-body">
+                    <div class="modal-body" style="width: 600px">
                         <div class="form-check" v-for="fun in funcionarios" :key="fun.codfun">
                             <input type="checkbox" class="form-check-input" :value="fun.codfun" v-model="funcionariosSel">
                             <label class="form-check-label" :for="fun.nomefun">{{fun.nomefun}}</label>
