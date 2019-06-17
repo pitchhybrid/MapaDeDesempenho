@@ -11,10 +11,10 @@ from os import urandom,path
 app = Flask("mapa de desempenho")
 app.debug = False
 app.secret_key = str(urandom(24))
-app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=1000)
-app.config['JWT_VERIFY_EXPIRATION'] = False
+app.config['JWT_EXPIRATION_DELTA'] = timedelta(seconds=500)
+app.config['JWT_VERIFY_EXPIRATION'] = True
 app.config['JWT_AUTH_URL_RULE'] = "/api/auth"
-app.config['CORS_HEADERS'] = 'Content-Type'
+app.config['CORS_HEADERS'] = 'application/json'
 
 ################### METODOS PARA A JWT ########################################
 
@@ -30,8 +30,8 @@ def identity(payload):
     identidade = userid.getUsuario(user[1])
     return identidade
 
-JWT(app,authenticate,identity)
 CORS(app)
+JWT(app,authenticate,identity)
 
 ################## ROTAS (ENDPOINTS) #########################################
 #### RAIZ (HOME) #######

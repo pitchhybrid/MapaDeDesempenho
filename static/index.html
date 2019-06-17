@@ -14,7 +14,6 @@
     <script src="../static/js/all.js"></script>
     <script src="../static/js/vue.js"></script>
     <script src="../static/js/vue-router.js"></script>
-    <script src="../static/js/axios.min.js"></script>
     <script src="../static/js/Chart.bundle.min.js"></script>
     <script src="../static/js/moment.js"></script>
     <script src="../static/js/jspdf.min.js"></script>
@@ -39,15 +38,16 @@
     <template id="navbar">
         
             <nav class="navbar bg-blue mb-4">            
-                
-                <button class="btn btn-outline-light" @click.stop.prevent="toggle()">Menu</button>
+                <button class="btn btn-outline-light" @click.stop.prevent="toggle()">
+                    <i class="fas fa-bars"></i>
+                </button>
             </nav>
             
     </template>
 
     <template id="relatorio-gen">
         <div class="box mb-4 border">
-                <p style="text-align:center;font-size: 2em" class="display-4">{{titulo}}</p>
+                <p style="text-align:center;font-size: 2em" class="display-4"> <i :class="classe"></i>  {{titulo}}</p>
             <div class="table-responsive" >
                 <table class="table table-hover" :class="titulo.replace(/ /g,'_')">
                     <thead>
@@ -101,12 +101,12 @@
                 
             <div id="relatorioExportar">
                 <div class="box border mb-3">
-                    <p style="text-align:center;font-size: 2.5em" class="display-4">{{mesRel}}</p>
+                    <p style="text-align:center;font-size: 2.5em" class="display-4"><i class="far fa-calendar-alt"></i>  {{mesRel}}</p>
                 </div>
                 <grafico></grafico>
-                <relatorio-gen :cabecalho="cabecalho" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
-                <relatorio-gen :cabecalho="cabecalho" :entrada="dadosqtd"   :titulo="'VENDAS POR DIA'"></relatorio-gen>
-                <relatorio-gen :cabecalho="cabecalho" :entrada="dadosvenda" :titulo="'VENDAS POR HORA'"></relatorio-gen>
+                <relatorio-gen :classe="'fas fa-hourglass-half'" :cabecalho="cabecalho" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
+                <relatorio-gen :classe="'fas fa-coins'" :cabecalho="cabecalho" :entrada="dadosqtd"   :titulo="'VENDAS POR DIA'"></relatorio-gen>
+                <relatorio-gen :classe="'fas fa-tablets'" :cabecalho="cabecalho" :entrada="dadosvenda" :titulo="'VENDAS POR HORA'"></relatorio-gen>
                 <media-global  :entrada="dadosMedia"></media-global> 
             </div>
             
@@ -143,7 +143,7 @@
 
     <template id="media-global">
         <div class="box border mb-5">
-                <p style="text-align:center;font-size: 2em" class="display-4">MEDIA DE RENDIMENTO</p>
+                <p style="text-align:center;font-size: 2em" class="display-4"><i class="fas fa-chart-line"></i> MEDIA DE RENDIMENTO</p>
             <div class="justify-content-center">
                 <table class="table table-hover">
                     <thead>
@@ -362,10 +362,10 @@
                     <div class="bg-roxo border-right " id="sidebar-wrapper">
                       <div class="list-group list-group-flush bg-roxo">
                         <router-link to="/" class="list-group-item list-group-item-action"><img id="logo" src="../static/img/logo.png" alt="Logo"></router-link>
-                        <p style="text-align:center;font-size: 1.1em" class="list-group-item list-group-item-action">{{usuario | toUpper}}</p>
-                        <router-link to="/" class="list-group-item list-group-item-action">Relatorio</router-link>
-                        <router-link to="/Gerenciamento" class="list-group-item list-group-item-action">Gerenciamento</router-link>
-                        <a href="#" class="list-group-item list-group-item-action" @click.stop.prevent="logout()">Sair</a>
+                        <p style="text-align:center;font-size: 1.1em" class="list-group-item list-group-item-action"> <i class="fas fa-user"></i> {{usuario | toUpper}}</p>
+                        <router-link to="/" class="list-group-item list-group-item-action"><i class="fas fa-chart-pie"></i> Relatorio</router-link>
+                        <router-link to="/Gerenciamento" class="list-group-item list-group-item-action"> <i class="fas fa-cogs"></i> Gerenciamento</router-link>
+                        <a href="#" class="list-group-item list-group-item-action" @click.stop.prevent="logout()"><i class="fas fa-sign-out-alt"></i> Sair</a>
                       
                         </div>
 
@@ -420,7 +420,7 @@
         </div>
     </template>
 
-    <script src="../static/js/jquery-3.3.1.slim.min.js"></script>
+    <script src="../static/js/jquery-3.4.1.min.js"></script>
     <script src="../static/js/bootstrap.min.js"></script>
     <script src="../static/js/main.js"></script>
 </body>

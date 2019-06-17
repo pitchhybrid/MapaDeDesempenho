@@ -1,7 +1,10 @@
 var dados = [];
 var myChart;
-axios.defaults.baseURL = 'http://127.0.0.1:5000/api';
-axios.defaults.headers.common['Authorization'] = "JWT " + sessionStorage.getItem("AUTH_TOKEN");
+
+var headers = {
+    "Content-Type": 'application/json',
+    "Authorization": "JWT " + sessionStorage.getItem("AUTH_TOKEN")
+}
 
 var login = Vue.component("login",{
     template:"#login",
@@ -14,29 +17,26 @@ var login = Vue.component("login",{
     methods:{
         login(){
             vm = this
-            axios({
-                    method: 'post',
-                    url: '/auth',
-                    data: {
-                        username: this.username,
-                        password: this.password
-                }
-                }).then(function(response){
-                        let AUTH_TOKEN = response.data.access_token;
-                        sessionStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
-                        sessionStorage.setItem("USUARIO",vm.username)
-                        app.$data.login = sessionStorage.getItem("AUTH_TOKEN")
-                        axios.defaults.headers.common['Authorization'] = "JWT " + sessionStorage.getItem("AUTH_TOKEN");
-                        axios.defaults.headers.common['Content-Type'] = 'application/json';
-                }).catch(err => {
-                    $("#erro").modal("toggle")
-                    console.error(err)
-                })
+            $.ajax({
+                type: "POST",
+                url: "/api/auth",
+                data: JSON.stringify({username:vm.username,password:vm.password}),
+                headers: {
+                        "Content-Type": 'application/json'
+                    },
+                success: function(response){
+                    let AUTH_TOKEN = response.access_token
+                    sessionStorage.setItem("AUTH_TOKEN",AUTH_TOKEN)
+                    sessionStorage.setItem("USUARIO",vm.username)
+                    app.$data.login = sessionStorage.getItem("AUTH_TOKEN")
+                },
+                dataType: ""
+                });
             }
     }});
 
 var media = Vue.component("media-global",{ template:"#media-global", props:{ entrada:Array } })
-var relatorio_gen =  Vue.component("relatorio-gen",{ template:"#relatorio-gen", props:{ titulo:String, entrada:Array, cabecalho:Array } } )
+var relatorio_gen =  Vue.component("relatorio-gen",{ template:"#relatorio-gen", props:{ titulo:String, entrada:Array, cabecalho:Array,classe:String } } )
 var relatorio = Vue.component("relatorio",{
     template:"#relatorio",
     data(){
@@ -57,12 +57,15 @@ var relatorio = Vue.component("relatorio",{
     },
     created(){
         let vm = this
-        axios({
-                method: 'get',
-                url: '/consulta/funcionarios'
-                }).then(function(response){
-                        vm.funcionarios = response.data
-                }).catch(err => console.error(err))
+        $.ajax({
+                type: "GET",
+                url: "/api/consulta/funcionarios",
+                headers: window.headers,
+                success: function(response){
+                    vm.funcionarios = response
+                },
+                dataType: ""
+                });
     },
     updated(){
         graficoFun(this.toArray(),this.totais())
@@ -95,28 +98,28 @@ var relatorio = Vue.component("relatorio",{
             fun.push(i)
 
             if(this.horaInicio && this.horaFim){
-                axios({
-                        method: 'get',
-                        url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim + '/' + this.horaInicio + '/' + this.horaFim
-                        }).then(function(response){
-                                vm.dados = response.data
-                                vm2.popular()
-                        }).catch(err =>{
-                            console.log(err)
-                            alert("PREENCHA OS CAMPOS")
-                    })
+                $.ajax({
+                        type: "GET",
+                        url: '/api/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim + '/' + this.horaInicio + '/' + this.horaFim,
+                        headers: window.headers,
+                        success: function(response){
+                            vm.dados = response
+                            vm2.popular()
+                        },
+                        dataType: ""
+                        });
             }
             else{
-                axios({
-                    method: 'get',
-                    url: '/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim
-                    }).then(function(response){
-                            vm.dados = response.data
-                            vm2.popular()
-                    }).catch(err => {
-                        console.log(err)
-                        alert("PREENCHA OS CAMPOS")
-                    })
+                $.ajax({
+                    type: "GET",
+                    url: '/api/consulta/['+ fun.toString() +']/'+ this.dataInicio + '/' + this.dataFim,
+                    headers: window.headers,
+                    success: function(response){
+                        vm.dados = response
+                        vm2.popular()
+                    },
+                    dataType: ""
+                    });
             }
         },
         popular(){
@@ -274,13 +277,17 @@ var gerenciamento_gen = Vue.component("gerenciamento-gen",{
         },
         addUsuario(){
             if(this.senha == this.repeticao_senha){
-                axios({
-                method: 'post',
-                url: '/user/cadastrar',
-                data:{ login:this.usuario, senha:this.senha, nome:this.nome, email:this.email }
-                }).then(function(response){
-                        console.log(response)
-                }).catch(err => console.error(err))
+                var vm = this
+                $.ajax({
+                    type: "POST",
+                    url: "/api/user/cadastrar",
+                    data: JSON.stringify({login:vm.usuario, senha:vm.senha, nome:vm.nome, email:vm.email}),
+                    headers: window.headers,
+                    success: function(response){
+                       
+                    },
+                    dataType: ""
+                  });
             location.reload(true)
             }else{
                 alert("senhas incorretas")
@@ -289,74 +296,80 @@ var gerenciamento_gen = Vue.component("gerenciamento-gen",{
         },
         altUsuario(){
             if(this.senha == this.repeticao_senha){
-                axios({
-                method: 'post',
-                url: '/user/atualizar',
-                data:{
-                        login:this.usuario,
-                        senha:this.senha,
-                        nome:this.nome,
-                        email:this.email,
-                        cod:this.coduser
-                }
-                }).then(function(response){
-                        console.log(response.data)
-                }).catch(err => console.error(err))
+                var vm = this
+                $.ajax({
+                    type: "POST",
+                    url: "/api/user/atualizar",
+                    data: JSON.stringify({login:vm.usuario, senha:vm.senha, nome:vm.nome, email:vm.email,cod:vm.coduser}),
+                    headers: window.headers,
+                    success: function(response){
+                        
+                    },
+                    dataType: ""
+                  });
                 location.reload(true)
             }else{
                 alert("senhas incorretas")
             }
         },
         remUsuario(cod){
-            axios({
-                method: 'post',
-                url: '/user/deletar',
-                data:{
-                        cod:cod
-                }
-                }).then(function(response){
-                        console.log(response)
-                }).catch(err => console.error(err)) 
-                location.reload(true)
+            $.ajax({
+                type: "POST",
+                url: "/api/user/deletar",
+                data: JSON.stringify({
+                    cod:cod
+                }),
+                headers: window.headers,
+                success: function(response){
+                },
+                dataType: ""
+              });
+            location.reload(true)
             
         },
         addFuncionario(){
-            axios({
-                method: 'post',
-                url: '/funcionario/cadastrar',
-                data:{
-                        codfun:this.codfun,
-                        nomefun:this.funcionario,
-                }
-                }).then(function(response){
-                        console.log(response)
-                }).catch(err => console.error(err))
+            var vm = this
+            $.ajax({
+                type: "POST",
+                url: "/api/funcionario/cadastrar",
+                data: JSON.stringify({
+                    codfun:vm.codfun,
+                    nomefun:vm.funcionario
+            }),
+                headers: window.headers,
+                success: function(response){
+                    
+                },
+                dataType: ""
+              });
             location.reload(true)
         },
         altFuncionario(){
-            axios({
-                method: 'post',
-                url: '/funcionario/atualizar',
-                data:{
-                        codfun:this.codfun,
-                        nomefun:this.funcionario
-                }
-                }).then(function(response){
-                        console.log(response)
-                }).catch(err => console.error(err))
+            var vm = this
+            $.ajax({
+                type: "POST",
+                url: "/api/funcionario/atualizar",
+                data: JSON.stringify({ codfun:vm.codfun, nomefun:vm.funcionario } ),
+                headers: window.headers,
+                success: function(response){
+                },
+                dataType: ""
+              });
             location.reload(true)
         },
         remFuncionario(cod){
-            axios({
-                method: 'post',
-                url: '/funcionario/deletar',
-                data:{
-                    codfun:cod
-                }
-                }).then(function(response){
-                        console.log(response)
-                }).catch(err => console.error(err)) 
-                location.reload(true)
+        var vm = this
+        $.ajax({
+            type: "POST",
+            url: "/api/funcionario/deletar",
+            data: JSON.stringify({ codfun:cod }),
+            headers: window.headers,
+            success: function(response){
+                
+            },
+            dataType: ""
+            });
+        location.reload(true)
         }
     }
 });
@@ -371,19 +384,25 @@ var gerenciamento = Vue.component("gerenciamento",{
     },
     mounted(){
         let vm = this
-        axios({
-                method: 'get',
-                url: '/consulta/funcionarios'
-                }).then(function(response){
-                    vm.funcionarios = response.data
-                }).catch(err => console.error(err))
+        $.ajax({
+            type: "GET",
+            url: "/api/consulta/funcionarios",
+            headers: window.headers,
+            success: function(response){
+                vm.funcionarios = response
+            },
+            dataType: ""
+          });
         
-        axios({
-                method: 'get',
-                url: '/consulta/usuarios'
-                }).then(function(response){ 
-                    vm.usuarios = response.data
-                }).catch(err => console.error(err))
+        $.ajax({
+            type: "GET",
+            url: "/api/consulta/usuarios",
+            headers: window.headers,
+            success: function(response){
+                vm.usuarios = response
+            },
+            dataType: ""
+          });
         
         }
         
@@ -406,7 +425,6 @@ var lateralmenu = Vue.component("lateralmenu",{
             app.login = null;
             sessionStorage.removeItem("AUTH_TOKEN")
             sessionStorage.removeItem("USUARIO")
-            axios.defaults.headers.common['Authorization'] = null;
             window.location.href = "/"; 
         }    
     } });
