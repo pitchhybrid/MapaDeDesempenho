@@ -92,16 +92,16 @@
                     <input type="text" v-model="horaFim" class="form-control"/>
                 </div>
             </div>
-            <div class="row justify-content-around mb-4">
-                <button class="btn btn-info" @click.stop.prevent="limpar()">Limpar Relatorio</button>
-                <button class="btn btn-success" data-toggle="modal" data-target="#GerarRelatorio">Gerar Relatorio</button>
-                <button class="btn btn-secondary" @click.stop.prevent="exportar()" >Exportar Relatorio</button>
+            <div class="row justify-content-around">
+                <button class="btn btn-info mb-4" @click.stop.prevent="limpar()">Limpar Relatorio</button>
+                <button class="btn btn-success mb-4" data-toggle="modal" data-target="#GerarRelatorio">Gerar Relatorio</button>
+                <button class="btn btn-secondary mb-4" @click.stop.prevent="exportar()" >Exportar Relatorio</button>
                
             </div>
                 
             <div id="relatorioExportar">
                 <div class="box border mb-3">
-                    <p style="text-align:center;font-size: 2.5em" class="display-4"><i class="far fa-calendar-alt"></i>  {{mesRel}}</p>
+                    <p style="text-align:center;font-size: 2em" class="display-4"><i class="far fa-calendar-alt"></i>  {{mesRel}}</p>
                 </div>
                 <grafico></grafico>
                 <relatorio-gen :classe="'fas fa-hourglass-half'" :cabecalho="cabecalho" :entrada="dadostempo" :titulo="'TEMPO ATIVO'"></relatorio-gen>
