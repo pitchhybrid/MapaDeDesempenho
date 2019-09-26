@@ -5,6 +5,7 @@ from classes.orm import Orm
 from classes.usuario import Usuario
 from datetime import timedelta
 from os import urandom,path
+import env
 
 ################### CONFIGURAÇOES DA APLICAÇÂO ################################
 
@@ -180,4 +181,5 @@ def getUser():
 ################### ENDPOINTS PARA A GERENCIA DE RELATORIOS #####################################
 
 if __name__ == '__main__':
+    env
     app.run(host="0.0.0.0",port=5000)

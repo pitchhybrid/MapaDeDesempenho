@@ -1,15 +1,20 @@
 import fdb
+from os import environ
 
 class Orm(object):
     #Informacoes do banco alvo
-    # nome_banco = '/opt/BD.ib' #LOCAL
-    nome_banco = r"fortaleza232.dlinkddns.com/3050:C:\TESTE\TESTE.ib" #SERVIDOR
-    login_banco = 'SYSDBA'
-    senha_banco = 'masterkey'
     #construtor da classe
     
     def __init__(self):
-        pass
+        if 'nome_banco_local' in environ:
+            self.nome_banco = environ['nome_banco_local']
+        
+        if 'nome_banco_externo' in environ:
+            self.nome_banco = environ['nome_banco_externo']
+
+        self.login_banco = environ['login_banco']
+        self.senha_banco = environ['senha_banco']
+        
     
     def autenticacao(self):
         self._db_handle=None
